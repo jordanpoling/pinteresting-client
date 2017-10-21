@@ -1,11 +1,20 @@
 const express = require('express');
 
-const app = express();
+// const BodyParser = require('body-parser');
 
-app.get('/', (req, res)=>{
+const App = express();
+
+// App.use(BodyParser);
+
+App.get('/', (req, res) => {
   console.log(req);
+  res.send();
 });
 
-app.listen(3000, () =>{
+App.post('/test', (req, res) => {
+  console.log('post');
+});
+
+App.listen(3000, () => {
   console.log('the server is running!');
 });
