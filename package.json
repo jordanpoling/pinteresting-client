@@ -1,0 +1,33 @@
+{
+  "name": "hrsf82-thesis",
+  "version": "1.0.0",
+  "description": "Thesis",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanpoling/hrsf82-thesis.git"
+  },
+  "author": "Jordan Poling",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jordanpoling/hrsf82-thesis/issues"
+  },
+  "homepage": "https://github.com/jordanpoling/hrsf82-thesis#readme",
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.4.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.138.0",
+    "express": "^4.16.2",
+    "node-inspector": "^1.1.1",
+    "nodemon": "^1.12.1",
+    "postgresql": "0.0.1"
+  }
+}

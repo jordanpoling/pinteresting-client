@@ -4,6 +4,12 @@ config/production.json
 config/staging.json
 config/test.json
 
+#VScode
+.vscode/
+
+# ESLint
+.eslintrc.js
+
 # OS X
 .DS_Store
 
