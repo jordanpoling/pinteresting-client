@@ -13,6 +13,7 @@ App.get('/', (req, res) => {
 
 App.post('/test', (req, res) => {
   console.log('post');
+  //  send list of clicked ads to tims component
 });
 
 App.listen(3000, () => {
