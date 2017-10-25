@@ -7,7 +7,7 @@ const App = express();
 // App.use(BodyParser);
 
 App.get('/', (req, res) => {
-  // console.log(req);
+  
   res.send();
 });
 
