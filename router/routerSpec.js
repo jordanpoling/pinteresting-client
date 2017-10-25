@@ -9,13 +9,12 @@ const it = chai.it();
 
 chai.use(chaiHttp);
 
-// routes
 const ads = [{
   id: 1,
   ad_description: 'The Next iPhone X will be awesome',
   ad_url: 'https://www.apple.com/iphone-x/',
   ad_img_url: 'http://drop.ndtv.com/TECH/product_database/images/913201720152AM_635_iphone_x.jpeg',
-  ad_group: 'Technology'
+  ad_group: 'Technology',
 },
 {
   id: 2,
@@ -34,7 +33,6 @@ const ads = [{
 
 
 describe('/', () => {
-
   it('should respond with ads for user', (done) => {
     chai.request(router)
       .get('/')
@@ -46,9 +44,8 @@ describe('/', () => {
   });
 });
 
-// should have "/adClicked" that accepts requests to update funnel depth in advertisements component
-describe('/adClicked', () => {
 
+describe('/adClicked', () => {
   it('should respond with success on update of advertisements DB', (done) => {
     chai.request(router)
       .get('/adClicked')
@@ -60,7 +57,6 @@ describe('/adClicked', () => {
   });
 });
 
-// should have "/sessionEnd" which submits end of session statistics to analytics
 describe('/sessionEnd', () => {
   const pData = {
     userId: 12345,
@@ -75,19 +71,6 @@ describe('/sessionEnd', () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.equal(pData);
-        done();
-      });
-  });
-});
-/* should receive 200 status on success */
-/* should pass properly formatted JSON to process data */
-describe('/adClicked', () => {
-  it('should pass properly formatted JSON to process data ', (done) => {
-    chai.request(router)
-      .get('/adClicked')
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.equal({ success: true });
         done();
       });
   });
