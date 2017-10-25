@@ -4,6 +4,8 @@ const chaiHttp = require('chai-http');
 
 const router = require('../router/index.js');
 
+const should = chai.should();
+
 chai.use(chaiHttp);
 
 const ads = [{
@@ -34,8 +36,9 @@ describe('/', () => {
     chai.request(router)
       .get('/')
       .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.equal(ads);
+        const result = JSON.stringify(res.body.ads);
+        res.status.should.equal(200);
+        result.should.equal(JSON.stringify(ads));
         done();
       });
   });
@@ -45,29 +48,33 @@ describe('/', () => {
 describe('/adClicked', () => {
   it('should respond with success on update of advertisements DB', (done) => {
     chai.request(router)
-      .get('/adClicked')
+      .post('/adClicked')
       .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.equal({ success: true });
+        res.status.should.equal(200);
         done();
       });
   });
 });
 
 describe('/sessionEnd', () => {
-  const pData = {
+  const pData = JSON.stringify({
     userId: 12345,
-    adClicks: { cat1: 1, cat2: 0, cat3: 5 },
-    engagementScore: 0.68,
-    scoreDropped: false,
-    success: true,
-  };
+    aClicks: {
+      cat1: 1,
+      cat2: 0,
+      cat3: 5,
+    },
+    aServed: 8,
+    pClicked: 12,
+    pServed: 32,
+  });
   it('should respond with success and proper JSON format on submission to analytics', (done) => {
     chai.request(router)
       .post('/sessionEnd')
       .end((err, res) => {
+        const result = JSON.stringify(res.body);
         res.should.have.status(200);
-        res.body.should.equal(pData);
+        result.should.equal(pData);
         done();
       });
   });

@@ -1,17 +1,10 @@
 const express = require('express');
 
-const bodyParser = require('body-parser');
-
-// const BodyParser = require('body-parser');
-
 const App = express();
 
-App.use(bodyParser);
-
-// App.use(BodyParser);
-
 App.get('/', (req, res) => {
-  res.body = {
+  console.log('get hit');
+  res.send({
     ads: [{
       id: 1,
       ad_description: 'The Next iPhone X will be awesome',
@@ -33,17 +26,11 @@ App.get('/', (req, res) => {
       ad_img_url: 'http://drop.ndtv.com/TECH/product_database/images/831201751753PM_635_sony_xperia_xz1_silver.jpeg',
       ad_group: 'Technology',
     }],
-  };
-  res.send();
-});
-
-App.post('/test', (req, res) => {
-  // console.log('post');
-  //  send list of clicked ads to tims component
+  });
 });
 
 App.listen(3001, () => {
-  console.log('the server is running!');
+  console.log('the server is listening on 3001');
 });
 
 module.exports = App;
