@@ -2,10 +2,7 @@ const chai = require('chai');
 
 const chaiHttp = require('chai-http');
 
-const router = require('./index.js');
-
-const describe = chai.describe();
-const it = chai.it();
+const router = require('../router/index.js');
 
 chai.use(chaiHttp);
 
