@@ -4,8 +4,8 @@ const Express = require('express');
 
 const App = Express();
 
-App.listen('8080', () => {
+App.listen('8081', () => {
   console.log('user sim connected');
 });
 
-Sim.firstSim();
+Sim.runSim();
