@@ -9,23 +9,25 @@ const App = express();
 App.use(bodyParser.json());
 
 App.get('/', (req, res) => {
+  console.log('router /');
   helpers.getAds()
     .then((response) => {
-      // console.log(response.data);
       res.status(200);
       res.send(response.data);
     })
     .catch((err) => {
-      // console.log(err);
+      console.log(err);
     });
 });
 
 App.post('/adclicked', (req, res) => {
+  console.log('router adClicked');
   res.status(200)
     .send();
 });
 
 App.post('/sessionEnd', (req, res) => {
+  console.log('router sessionEnd');
   const analyticsFormat = {
     userId: 12345,
     aClicks: {
