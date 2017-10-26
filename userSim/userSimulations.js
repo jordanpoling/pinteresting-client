@@ -4,6 +4,8 @@ const active = 0.7;
 const picky = 0.3;
 const occa = 0.2;
 
+let count = 0;
+
 const rawUsers = [
   {
     id: 123,
@@ -79,6 +81,8 @@ class User {
       ads.ads.forEach((ad) => {
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
+          console.log(count);
+          count++;
           this.funnelDepth(ad);
           this.clickResults.aClicks[ad.ad_group] !== undefined ? this.clickResults.aClicks[ad.ad_group] ++ : this.clickResults.aClicks[ad.ad_group] = 1;
           // console.log('aClicks', this.clickResults.aClicks)
