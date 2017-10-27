@@ -12,7 +12,6 @@ if (cluster.isMaster) {
   }
   // Listen for dying workers
   cluster.on('exit', (worker) => {
-    console.log('Worker %d died :(', worker.id);
     cluster.fork();
   });
 } else {
@@ -39,6 +38,8 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
+    //  write to the sessions database
+    //  
     console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,
@@ -51,7 +52,7 @@ if (cluster.isMaster) {
       pClicked: 12,
       pServed: 32,
     };
-    console.log(req.data)
+    console.log('data', req.body);
     res.status(200)
       .send(analyticsFormat);
   });
