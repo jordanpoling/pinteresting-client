@@ -6,11 +6,9 @@ const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
 
 if (cluster.isMaster) {
-  //  master code here
   for (let i = 0; i < cpuCount; i += 1) {
     cluster.fork();
   }
-  // Listen for dying workers
   cluster.on('exit', (worker) => {
     cluster.fork();
   });
@@ -38,8 +36,9 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
-    //  write to the sessions database
-    //  
+
+    helpers.calculateScore(req.body);
+
     console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,

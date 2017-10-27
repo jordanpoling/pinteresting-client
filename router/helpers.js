@@ -4,4 +4,8 @@ module.exports = {
   getAds: () => {
     return Axios.get('http://localhost:3001/');
   },
+  calculateScore: ({ userId, pClicked, pServed, aServed, aInteractions }) => {
+
+    console.log(userId, pClicked, pServed, aServed, aInteractions);
+  },
 };

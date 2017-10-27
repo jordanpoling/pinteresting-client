@@ -50,13 +50,17 @@ class User {
     this.clickResults = {
       userId: userID,
       total: 0,
-      aClicks: {},
+      aInteractions: {},
       pClicked: 0,
       pServed: 32,
+      aServed: 0,
+      totalAdInt: 0,
     };
     this.interests = interests;
     this.pinClickFreq = pinClickFreq;
     this.userName = userName;
+
+
     this.funnelDepth = ({ ad_group, id }) => {
       const probability = Math.random();
       if (probability < this.interests[ad_group] * 0.15) {
@@ -76,33 +80,37 @@ class User {
         });
       }
     };
+
+
     this.userInteractions = (ads) => {
-      for (let i = 0; i < 32; i+=1) {
+      for (let i = 0; i < 32; i += 1) {
         const probability = Math.random();
         if (probability < pinClickFreq) {
           this.clickResults.pClicked += 1;
         }
       }
+      this.clickResults.aServed = ads.ads.length;
       ads.ads.forEach((ad) => {
-        this.clickResults.aClicks = {};
-        this.clickResults.aServed = ads.length; 
-        console.log('clickResults', this.clickResults.aClicks);
+        console.log('clickResults', this.clickResults.aInteractions);
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
-          console.log('count: ', count);
-          count+=1;
+          // console.log('count: ', count);
+          count += 1;
           this.funnelDepth(ad);
-          console.log(ad.ad_group)
-          this.clickResults.aClicks[ad.ad_group] !== undefined ? this.clickResults.aClicks[ad.ad_group] ++ : this.clickResults.aClicks[ad.ad_group] = 1;
-          // console.log('aClicks', this.clickResults.aClicks)
+          if (this.clickResults.aInteractions[ad.ad_group]) {
+            const prevClicks = this.clickResults.aInteractions[ad.ad_group];
+            this.clickResults.aInteractions[ad.ad_group] = prevClicks + 1;
+            this.clickResults.totalAdInt += 1;
+          } else {
+            this.clickResults.aInteractions[ad.ad_group] = 1;
+            this.clickResults.totalAdInt += 1;
+          }
+          // console.log('aInteractions', this.clickResults.aInteractions)
         }
       });
       axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
         console.log(error);
       });
-    };
-    this.pinClicks = () => {
-
     };
     this.login = () => axios.get('http://localhost:8080/').catch((error) => {
       console.log(error);
@@ -125,7 +133,6 @@ const makeUsersBehave = (users) => {
     console.log(user.clickResults);
     user.login()
       .then((ads) => {
-        user.pinClicks();
         user.userInteractions(ads.data);
       })
       .catch((err) => { console.log(err); });
