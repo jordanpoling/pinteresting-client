@@ -1,10 +1,10 @@
 const express = require('express');
 const helpers = require('./helpers');
 const bodyParser = require('body-parser');
-const db = require('../database/index.js');
 const dbHelpers = require('../database/dbHelpers.js');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
+const elastic = require('../database/elasticSearch.js');
 
 if (cluster.isMaster) {
   for (let i = 0; i < cpuCount; i += 1) {
@@ -37,8 +37,11 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
+    const score = helpers.calculateScore(req.body);
 
-    dbHelpers.insertHealth(helpers.calculateScore(req.body));
+    dbHelpers.insertHealth(score);
+    elastic.insert(score);
+
     console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,
@@ -51,6 +54,7 @@ if (cluster.isMaster) {
       pClicked: 12,
       pServed: 32,
     };
+    
     console.log('data', req.body);
     res.status(200)
       .send(analyticsFormat);

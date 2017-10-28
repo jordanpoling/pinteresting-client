@@ -1,8 +1,8 @@
 const axios = require('axios');
 
-const active = 0.7;
-const picky = 0.3;
-const occa = 0.2;
+const active = 0.5;
+const picky = 0.35;
+const occa = 0.3;
 
 let count = 0;
 
@@ -10,7 +10,7 @@ const rawUsers = [
   {
     userID: 123,
     interests: {
-      technology: 0.5,
+      technology: 0.7,
       skateboarding: 0.25,
       supreme: 0.25,
       noodels: 0.50,
@@ -21,7 +21,7 @@ const rawUsers = [
   {
     userID: 1234,
     interests: {
-      technology: 0.3,
+      technology: 0.4,
       skateboarding: 0.25,
       supreme: 0.50,
       noodels: 0.25,
@@ -32,7 +32,7 @@ const rawUsers = [
   {
     userID: 12345,
     interests: {
-      technology: 0.7,
+      technology: 0.2,
       skateboarding: 0.50,
       supreme: 0.25,
       noodels: 0.25,
