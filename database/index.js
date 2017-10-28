@@ -4,7 +4,7 @@ const cn = {
   host: 'localhost',
   port: 5432,
   database: 'users',
-  user: 'root',
+  user: 'Jordan',
   password: '',
 };
 

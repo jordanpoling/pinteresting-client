@@ -2,6 +2,7 @@ const express = require('express');
 const helpers = require('./helpers');
 const bodyParser = require('body-parser');
 const db = require('../database/index.js');
+const dbHelpers = require('../database/dbHelpers.js');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
 
@@ -37,8 +38,7 @@ if (cluster.isMaster) {
 
   App.post('/sessionEnd', (req, res) => {
 
-    helpers.calculateScore(req.body);
-
+    dbHelpers.insertHealth(helpers.calculateScore(req.body));
     console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,

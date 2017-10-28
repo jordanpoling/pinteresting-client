@@ -91,10 +91,9 @@ class User {
       }
       this.clickResults.aServed = ads.ads.length;
       ads.ads.forEach((ad) => {
-        console.log('clickResults', this.clickResults.aInteractions);
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
-          // console.log('count: ', count);
+          console.log('count: ', count);
           count += 1;
           this.funnelDepth(ad);
           if (this.clickResults.aInteractions[ad.ad_group]) {
@@ -105,7 +104,6 @@ class User {
             this.clickResults.aInteractions[ad.ad_group] = 1;
             this.clickResults.totalAdInt += 1;
           }
-          // console.log('aInteractions', this.clickResults.aInteractions)
         }
       });
       axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
@@ -128,7 +126,8 @@ const makeActiveUsers = (usersForClass) => {
 };
 
 
-const makeUsersBehave = (users) => {
+const makeUsersBehave = () => {
+  const users = makeActiveUsers(rawUsers);
   users.forEach((user) => {
     console.log(user.clickResults);
     user.login()
@@ -142,7 +141,7 @@ const makeUsersBehave = (users) => {
 
 module.exports = {
   runSim: () => {
-    const userList = makeActiveUsers(rawUsers);
-    makeUsersBehave(userList);
+    // makeUsersBehave(userList);
+    setInterval(() =>{makeUsersBehave()}, 20);
   },
 };

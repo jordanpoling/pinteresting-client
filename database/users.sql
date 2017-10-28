@@ -34,6 +34,11 @@ SET default_with_oids = false;
 -- Name: engagement; Type: TABLE; Schema: public; Owner: Jordan
 --
 
+DROP DATABASE IF EXISTS users;
+CREATE DATABASE users;
+
+\c users;
+
 CREATE TABLE engagement (
     id integer NOT NULL,
     score numeric,
