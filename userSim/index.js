@@ -1,5 +1,4 @@
 const Sim = require('./userSimulations.js');
-
 const Express = require('express');
 
 const App = Express();

@@ -1,55 +1,66 @@
 const axios = require('axios');
 
-const active = 0.7;
-const picky = 0.3;
-const occa = 0.2;
+const active = 0.5;
+const picky = 0.35;
+const occa = 0.3;
+
+let count = 0;
 
 const rawUsers = [
   {
-    id: 123,
+    userID: 123,
     interests: {
-      technology: 0.5,
+      technology: 0.7,
       skateboarding: 0.25,
       supreme: 0.25,
       noodels: 0.50,
     },
-    pinClicks: active,
+    pinClickFreq: active,
     userName: 'Jordan',
   },
   {
-    id: 1234,
+    userID: 1234,
     interests: {
-      technology: 0.3,
+      technology: 0.4,
       skateboarding: 0.25,
       supreme: 0.50,
       noodels: 0.25,
     },
-    pinClicks: picky,
+    pinClickFreq: picky,
     userName: 'Tim',
   },
   {
-    id: 12345,
+    userID: 12345,
     interests: {
-      technology: 0.7,
+      technology: 0.2,
       skateboarding: 0.50,
       supreme: 0.25,
       noodels: 0.25,
     },
-    pinClicks: occa,
+    pinClickFreq: occa,
     userName: 'Devon',
   },
 ];
 
 
 class User {
-  constructor({ interests, pinClicks, userName }) {
-    this.interests = interests;
-    this.pinClicks = pinClicks;
-    this.userName = userName;
+  constructor({
+    userID, interests, pinClickFreq, userName,
+  }) {
     this.clickResults = {
-      pServed: 0,
+      userId: userID,
+      total: 0,
+      aInteractions: {},
       pClicked: 0,
+      pServed: 32,
+      aServed: 0,
+      totalAdInt: 0,
     };
+    this.interests = interests;
+    this.pinClickFreq = pinClickFreq;
+    this.userName = userName;
+
+
     this.funnelDepth = ({ ad_group, id }) => {
       const probability = Math.random();
       if (probability < this.interests[ad_group] * 0.15) {
@@ -69,32 +80,35 @@ class User {
         });
       }
     };
-    this.adClicks = (ads) => {
-      this.clickResults = {
-        userId: this.id,
-        total: 0,
-        aServed: ads.length,
-        aClicks: {},
-      };
+
+
+    this.userInteractions = (ads) => {
+      for (let i = 0; i < 32; i += 1) {
+        const probability = Math.random();
+        if (probability < pinClickFreq) {
+          this.clickResults.pClicked += 1;
+        }
+      }
+      this.clickResults.aServed = ads.ads.length;
       ads.ads.forEach((ad) => {
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
+          console.log('count: ', count);
+          count += 1;
           this.funnelDepth(ad);
-          this.clickResults.aClicks[ad.ad_group] !== undefined ? this.clickResults.aClicks[ad.ad_group] ++ : this.clickResults.aClicks[ad.ad_group] = 1;
-          // console.log('aClicks', this.clickResults.aClicks)
+          if (this.clickResults.aInteractions[ad.ad_group]) {
+            const prevClicks = this.clickResults.aInteractions[ad.ad_group];
+            this.clickResults.aInteractions[ad.ad_group] = prevClicks + 1;
+            this.clickResults.totalAdInt += 1;
+          } else {
+            this.clickResults.aInteractions[ad.ad_group] = 1;
+            this.clickResults.totalAdInt += 1;
+          }
         }
       });
       axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
         console.log(error);
       });
-    };
-    this.pinClicks = () => {
-      this.clickResults.pServed = 32;
-      this.clickResults.pClicked = 0;
-      for (let i = 0; i < 32; i++) {
-        const probability = Math.random();
-        probability < this.pinClicks ? this.clickResults.pinClicks += 1 : null;
-      }
     };
     this.login = () => axios.get('http://localhost:8080/').catch((error) => {
       console.log(error);
@@ -112,12 +126,13 @@ const makeActiveUsers = (usersForClass) => {
 };
 
 
-const makeUsersBehave = (users) => {
+const makeUsersBehave = () => {
+  const users = makeActiveUsers(rawUsers);
   users.forEach((user) => {
+    console.log(user.clickResults);
     user.login()
       .then((ads) => {
-        user.pinClicks();
-        user.adClicks(ads.data);
+        user.userInteractions(ads.data);
       })
       .catch((err) => { console.log(err); });
   });
@@ -126,7 +141,7 @@ const makeUsersBehave = (users) => {
 
 module.exports = {
   runSim: () => {
-    const userList = makeActiveUsers(rawUsers);
-    setInterval(() => {makeUsersBehave(userList)}, 15);
+    // makeUsersBehave(userList);
+    setInterval(() =>{makeUsersBehave()}, 20);
   },
 };
