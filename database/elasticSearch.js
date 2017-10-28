@@ -6,10 +6,10 @@ const client = new elasticSearch.Client({
 });
 
 module.exports = {
-  insert: ({ userHealth, userId }) => {
+  insertHealth: ({ userHealth, userId }) => {
     return client.index({
-      index: 'myindex',
-      type: 'userHealth',
+      index: 'user_health',
+      type: 'user_health',
       body: {
         userId,
         userHealth,
@@ -17,4 +17,15 @@ module.exports = {
       },
     });
   },
+  insertAverage : ({ avg, user_id }) => {
+    return client.index({
+      index: 'health_average',
+      type: 'health_average',
+      body: {
+        avg,
+        user_id,
+        date: new Date().toISOString(),
+      },
+    });
+  }
 };

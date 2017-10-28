@@ -40,9 +40,15 @@ if (cluster.isMaster) {
     const score = helpers.calculateScore(req.body);
 
     dbHelpers.insertHealth(score);
-    elastic.insert(score);
+    elastic.insertHealth(score);
 
-    console.log('router sessionEnd', req.body);
+    const avg = dbHelpers.usersAverage(req.body)
+      .then((result) => {console.log('USERS AVERAGE =======>>>>>>>>', result)})
+      .catch((err) =>{console.log('DB ERROR',err)});
+
+    elastic.insertAverage(avg);
+
+    // console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,
       aClicks: {
@@ -54,8 +60,7 @@ if (cluster.isMaster) {
       pClicked: 12,
       pServed: 32,
     };
-    
-    console.log('data', req.body);
+    // console.log('data', req.body);
     res.status(200)
       .send(analyticsFormat);
   });
