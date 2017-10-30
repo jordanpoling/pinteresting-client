@@ -80,7 +80,8 @@ CREATE TABLE users (
     age integer,
     gender text,
     location text,
-    average_score numeric
+    average_score numeric,
+    score_time timestamp
 );
 
 

@@ -7,6 +7,7 @@ module.exports = {
   calculateScore: ({
     userId, pClicked, pServed, aServed, aInteractions,
   }) => {
+    console.log('AD INTERACTIONS', aInteractions);
     const result = {
       userHealth: parseFloat((pClicked / pServed) + (aServed + aInteractions)),
       userId,

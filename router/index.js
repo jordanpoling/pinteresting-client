@@ -37,18 +37,31 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
-    const score = helpers.calculateScore(req.body);
+    const userId = req.body.userId;
+    let avg;
+    // dbHelpers.usersAverage(req.body).then((result)=>{avg = result});
+    dbHelpers.usersAverage(req.body).then((result) => {
+      avg = result[0].avg;
+      const user = {
+        avg,
+        userId,
+      };
+      console.log('USERUSER', user)
+      dbHelpers.updateUserAverage(user).catch((err)=>{console.log(err)});
+    }).catch((err)=>{console.log(err)});
 
+    const score = helpers.calculateScore(req.body);
+    // console.log('USERUSERUSER', user);
     dbHelpers.insertHealth(score);
     elastic.insertHealth(score);
+    //  insert if average is null or if averade is over a day old
+    //    else check average to stored average
+    //    if it has dropped by 15%
+    //      write to elastic warning and emit score to casey
 
-    const avg = dbHelpers.usersAverage(req.body)
-      .then((result) => {console.log('USERS AVERAGE =======>>>>>>>>', result)})
-      .catch((err) =>{console.log('DB ERROR',err)});
+    // elastic.insertAverage(avg);
 
-    elastic.insertAverage(avg);
 
-    // console.log('router sessionEnd', req.body);
     const analyticsFormat = {
       userId: 12345,
       aClicks: {
@@ -60,7 +73,6 @@ if (cluster.isMaster) {
       pClicked: 12,
       pServed: 32,
     };
-    // console.log('data', req.body);
     res.status(200)
       .send(analyticsFormat);
   });
