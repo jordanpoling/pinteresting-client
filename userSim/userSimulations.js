@@ -129,7 +129,6 @@ const makeActiveUsers = (usersForClass) => {
 const makeUsersBehave = () => {
   const users = makeActiveUsers(rawUsers);
   users.forEach((user) => {
-    console.log(user.clickResults);
     user.login()
       .then((ads) => {
         user.userInteractions(ads.data);
@@ -143,6 +142,9 @@ module.exports = {
   runSim: () => {
     // makeUsersBehave(userList);
     setInterval(() => { makeUsersBehave(); }, 25);
+    // makeUsersBehave();
+    // makeUsersBehave();
+    // makeUsersBehave();
     // makeUsersBehave();
   },
 };

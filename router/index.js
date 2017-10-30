@@ -38,21 +38,22 @@ if (cluster.isMaster) {
 
   App.post('/sessionEnd', (req, res) => {
     const userId = req.body.userId;
-    let avg;
-    // dbHelpers.usersAverage(req.body).then((result)=>{avg = result});
+    const score = helpers.calculateScore(req.body);
     dbHelpers.usersAverage(req.body).then((result) => {
-      avg = result[0].avg;
+      console.log('RESULT', result);
+      const avg = result[0].avg;
       const user = {
         avg,
         userId,
       };
-      console.log('USERUSER', user)
-      dbHelpers.updateUserAverage(user).catch((err)=>{console.log(err)});
-    }).catch((err)=>{console.log(err)});
+      dbHelpers.updateUserAverage(user)
+        .then(() => {
+          dbHelpers.insertHealth(score);
+        })
+        .catch((err) => { console.log(err) ;});
+    }).catch((err) => { console.log(err) ;});
 
-    const score = helpers.calculateScore(req.body);
-    // console.log('USERUSERUSER', user);
-    dbHelpers.insertHealth(score);
+
     elastic.insertHealth(score);
     //  insert if average is null or if averade is over a day old
     //    else check average to stored average
