@@ -6,15 +6,31 @@ const client = new elasticSearch.Client({
 });
 
 module.exports = {
-  insert: ({ userHealth, userId }) => {
-    return client.index({
-      index: 'myindex',
-      type: 'userHealth',
-      body: {
-        userId,
-        userHealth,
-        date: new Date().toISOString(),
-      },
-    });
-  },
+  insertHealth: ({ userHealth, userId }) => client.index({
+    index: 'user_health',
+    type: 'user_health',
+    body: {
+      userId,
+      userHealth,
+      date: new Date().toISOString(),
+    },
+  }),
+  insertAverage: (avg, userId) => client.index({
+    index: 'health_average',
+    type: 'health_average',
+    body: {
+      avg,
+      userId,
+      date: new Date().toISOString(),
+    },
+  }),
+  insertCritical: (avg, userId) => client.index({
+    index: 'critical_health',
+    type: 'critical_health',
+    body: {
+      avg,
+      userId,
+      date: new Date().toISOString(),
+    },
+  }),
 };

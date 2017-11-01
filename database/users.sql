@@ -43,7 +43,7 @@ CREATE TABLE engagement (
     id integer NOT NULL,
     score numeric,
     user_id integer,
-    "time" date
+    "time" timestamp
 );
 
 
@@ -79,7 +79,9 @@ CREATE TABLE users (
     user_name text,
     age integer,
     gender text,
-    location text
+    location text,
+    average_score numeric,
+    score_time timestamp
 );
 
 

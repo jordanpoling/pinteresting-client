@@ -6,6 +6,7 @@ const cn = {
   database: 'users',
   user: 'Jordan',
   password: '',
+  poolSize: 100,
 };
 
 const db = pgp(cn);

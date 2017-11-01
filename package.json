@@ -35,9 +35,11 @@
     "express": "^4.16.2",
     "knex": "^0.13.0",
     "mocha": "^4.0.1",
+    "moment": "^2.19.1",
     "nodemon": "^1.12.1",
     "pg": "^7.3.0",
     "pg-promise": "^7.0.3",
-    "postgresql": "0.0.1"
+    "postgresql": "0.0.1",
+    "redis": "^2.8.0"
   }
 }

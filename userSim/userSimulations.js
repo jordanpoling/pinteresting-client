@@ -10,12 +10,12 @@ const rawUsers = [
   {
     userID: 123,
     interests: {
-      technology: 0.7,
+      technology: 0.1,
       skateboarding: 0.25,
       supreme: 0.25,
       noodels: 0.50,
     },
-    pinClickFreq: active,
+    pinClickFreq: occa,
     userName: 'Jordan',
   },
   {
@@ -129,7 +129,6 @@ const makeActiveUsers = (usersForClass) => {
 const makeUsersBehave = () => {
   const users = makeActiveUsers(rawUsers);
   users.forEach((user) => {
-    console.log(user.clickResults);
     user.login()
       .then((ads) => {
         user.userInteractions(ads.data);
@@ -142,6 +141,10 @@ const makeUsersBehave = () => {
 module.exports = {
   runSim: () => {
     // makeUsersBehave(userList);
-    setInterval(() =>{makeUsersBehave()}, 20);
+    setInterval(() => { makeUsersBehave(); }, 20);
+    // makeUsersBehave();
+    // makeUsersBehave();
+    // makeUsersBehave();
+    // makeUsersBehave();
   },
 };

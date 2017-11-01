@@ -34,15 +34,28 @@ if (cluster.isMaster) {
     console.log('router adClicked');
     res.status(200)
       .send();
+    //  post job to queue for tim
   });
 
   App.post('/sessionEnd', (req, res) => {
+    const id = req.body.userId;
     const score = helpers.calculateScore(req.body);
-
-    dbHelpers.insertHealth(score);
-    elastic.insert(score);
-
-    console.log('router sessionEnd', req.body);
+    const user = {
+      id,
+      score: score.userHealth,
+    };
+    dbHelpers.insertHealth(user)
+      .then((result) => {
+        dbHelpers.updateUserAverage(result)
+          .then(({ average }) => {
+            if (average - score.userHealth > 0.2) {
+              elastic.insertCritical(score.userHealth, id);
+              //  add a job to casey's queue
+            }
+          })
+          .catch((err) => { console.log(err); });
+      });
+    elastic.insertHealth(score);
     const analyticsFormat = {
       userId: 12345,
       aClicks: {
@@ -54,8 +67,6 @@ if (cluster.isMaster) {
       pClicked: 12,
       pServed: 32,
     };
-    
-    console.log('data', req.body);
     res.status(200)
       .send(analyticsFormat);
   });
