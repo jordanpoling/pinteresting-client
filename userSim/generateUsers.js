@@ -1,21 +1,11 @@
 const name = require('node-random-name');
 const loc = require('random-world');
 const age = require('random-age');
+const csvWriter = require('csv-write-stream');
+const fs = require('fs');
 
-
+const writer = csvWriter();
 let globalId = 0;
-
-// const user = {
-//   userID: 123,
-//   interests: {
-//     technology: 0.1,
-//     skateboarding: 0.25,
-//     supreme: 0.25,
-//     noodels: 0.50,
-//   },
-//   pinClickFreq: occa,
-//   userName: 'Jordan',
-// };
 
 
 const pinClickGenerator = () => {
@@ -50,27 +40,35 @@ const ageGenerator = () => {
 const locationGenerator = () => loc.city();
 
 
+const ratioThresholdGenerator = () => {
+  let ratio = Math.round(Math.random() * 250) / 1000;
+  ratio < 0.04 ? ratio *= 4 : null;
+  return ratio;
+};
+
 const interestGenerator = () => {
+  const chance = () => Math.round(Math.random() * 100) / 100;
   const interests = {
-    food: Math.random(),
-    fashion: Math.random(),
-    products: Math.random(),
-    sports: Math.random(),
-    travel: Math.random(),
-    events: Math.random(),
-    design: Math.random(),
-    entertainment: Math.random(),
-    'DIY/crafts': Math.random(),
-    photography: Math.random(),
+    food: chance(),
+    fashion: chance(),
+    products: chance(),
+    sports: chance(),
+    travel: chance(),
+    events: chance(),
+    design: chance(),
+    entertainment: chance(),
+    'DIY/crafts': chance(),
+    photography: chance(),
   };
   return interests;
 };
 
 const userGenerator = () => {
-  const genderAndName = genderGenerator()
+  const genderAndName = genderGenerator();
   const userResult = {
+    ratioThreshold: ratioThresholdGenerator(),
     userID: globalId,
-    interests: interestGenerator(),
+    interests: JSON.stringify(interestGenerator()),
     pinClickFreq: pinClickGenerator(),
     userName: genderAndName.name,
     gender: genderAndName.gender,
@@ -81,5 +79,9 @@ const userGenerator = () => {
   return userResult;
 };
 
-
+writer.pipe(fs.createWriteStream('users.csv'));
+writer.write(userGenerator());
+writer.write(userGenerator());
+writer.write(userGenerator());
+writer.end();
 console.log(userGenerator());
