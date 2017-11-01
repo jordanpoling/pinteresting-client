@@ -37,32 +37,27 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
-    const userId = req.body.userId;
+    const id = req.body.userId;
     const score = helpers.calculateScore(req.body);
-    dbHelpers.usersAverage(req.body).then((result) => {
-      console.log('RESULT', result);
-      const avg = result[0].avg;
-      const user = {
-        avg,
-        userId,
-      };
-      dbHelpers.updateUserAverage(user)
-        .then(() => {
-          dbHelpers.insertHealth(score);
-        })
-        .catch((err) => { console.log(err) ;});
-    }).catch((err) => { console.log(err) ;});
-
-
+    const user = {
+      id,
+      score: score.userHealth,
+    };
+    console.log('USERUSERUSER', user);
+    dbHelpers.insertHealth(user)
+      .then((result) => {
+        console.log('result', result);
+        dbHelpers.updateUserAverage(result)
+          .then(({ average }) => {
+            if (average.average - score > 0.20) {
+              console.log('CRITICAL SCORE DROP!!!! ==>>>>', average.average - score);
+              elastic.insertAverage(average.average, id);
+            }
+            console.log('RESULT', average, 'CURRENT', score);
+          })
+          .catch((err) => { console.log(err); });
+      });
     elastic.insertHealth(score);
-    //  insert if average is null or if averade is over a day old
-    //    else check average to stored average
-    //    if it has dropped by 15%
-    //      write to elastic warning and emit score to casey
-
-    // elastic.insertAverage(avg);
-
-
     const analyticsFormat = {
       userId: 12345,
       aClicks: {

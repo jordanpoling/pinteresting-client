@@ -4,33 +4,26 @@ const moment = require('moment');
 //  CONSOLIDATE THESE TO A SINGLE QUERY
 
 module.exports = {
-  insertHealth: ({ userHealth, userId }) => {
-    console.log('insertHealth');
-    db.none(`INSERT INTO engagement(score, user_id, time) VALUES(${userHealth},${userId},now())`)
-      .catch((err) =>{console.log(err)});
-  },
-  usersAverage: ({ userId }) => {
-    const now = moment();
+  updateUserAverage: ({ average, id }) => {
     const yesterday = moment().subtract(1, 'days');
-    //  set average to variable
-    return db.query(`SELECT AVG(score), user_id
-    FROM engagement, users
-    where user_id = ${userId} AND time >= ${yesterday.format(`'YYYY-MM-DD HH:mm:ss'`)} AND time < ${now.format(`'YYYY-MM-DD HH:mm:ss'`)}
-    GROUP BY user_id`).catch((err)=>{console.log(err)});
+    console.log('inputs==>>>>>>>>>>>>>>>>>>', id, average);
+    db.none(`
+    UPDATE users SET average = ${average}, average_at = now() 
+    WHERE users.id = ${id}
+    AND (average IS NULL OR average_at < ${yesterday.format('\'YYYY-MM-DD HH:mm:ss\'')})
+    RETURNING score_sum / session_entries AS average;
+    `).then((result) => { console.log('success', result); })
+      .catch((err) => { console.log(err); });
+    return db.one(`SELECT score_sum / session_entries AS average
+      FROM users WHERE id = ${id}`).catch((err) => { console.log(err)});
   },
-  updateUserAverage: ({ userId, avg }) => { 
-    const yesterday = moment().subtract(1, 'days');
-    console.log('inputs', userId, avg);
-    return db.none(`
-    UPDATE users SET average_score = ${avg}, score_time = now() 
-    WHERE users.id = ${userId}
-    AND (average_score IS NULL OR score_time < ${yesterday.format(`'YYYY-MM-DD HH:mm:ss'`)})
-    RETURNING average_score;
+  insertHealth: ({ score, id }) => {
+    console.log('SCORE', score, 'ID', id);
+    return db.one(`UPDATE users SET score_sum = score_sum+${score}, session_entries = session_entries + 1
+    WHERE id = ${id}
+    RETURNING id, score_sum / session_entries AS average
     `)
-      .catch((err) =>{console.log(err)});
-  },
-  queryUsersAverage: (userId) => {
-    return db.query(`SELECT average_score FROM users WHERE id = ${userId}`)
-      .catch((err) =>{console.log(err)});
+      .catch((err) => { console.log('line 39 db helpers', err); });
   },
 };
+

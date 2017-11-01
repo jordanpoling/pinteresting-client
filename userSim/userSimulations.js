@@ -141,7 +141,7 @@ const makeUsersBehave = () => {
 module.exports = {
   runSim: () => {
     // makeUsersBehave(userList);
-    setInterval(() => { makeUsersBehave(); }, 25);
+    setInterval(() => { makeUsersBehave(); }, 20);
     // makeUsersBehave();
     // makeUsersBehave();
     // makeUsersBehave();
