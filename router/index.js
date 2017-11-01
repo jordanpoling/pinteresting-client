@@ -34,6 +34,7 @@ if (cluster.isMaster) {
     console.log('router adClicked');
     res.status(200)
       .send();
+    //  post job to queue for tim
   });
 
   App.post('/sessionEnd', (req, res) => {
@@ -43,16 +44,13 @@ if (cluster.isMaster) {
       id,
       score: score.userHealth,
     };
-    console.log('USERUSERUSER', user);
     dbHelpers.insertHealth(user)
       .then((result) => {
-        console.log('result', result);
         dbHelpers.updateUserAverage(result)
           .then(({ average }) => {
-            console.log('RESULT', average, 'CURRENT', score.userHealth, 'DIFF', average - score.userHealth);
             if (average - score.userHealth > 0.2) {
-              console.log('CRITICAL SCORE DROP!!!! ==>>>>', average- score.userHealth);
               elastic.insertCritical(score.userHealth, id);
+              //  add a job to casey's queue
             }
           })
           .catch((err) => { console.log(err); });
