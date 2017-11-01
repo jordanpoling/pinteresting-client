@@ -10,12 +10,12 @@ const rawUsers = [
   {
     userID: 123,
     interests: {
-      technology: 0.7,
+      technology: 0.1,
       skateboarding: 0.25,
       supreme: 0.25,
       noodels: 0.50,
     },
-    pinClickFreq: active,
+    pinClickFreq: occa,
     userName: 'Jordan',
   },
   {

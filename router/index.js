@@ -49,11 +49,11 @@ if (cluster.isMaster) {
         console.log('result', result);
         dbHelpers.updateUserAverage(result)
           .then(({ average }) => {
-            if (average.average - score > 0.20) {
-              console.log('CRITICAL SCORE DROP!!!! ==>>>>', average.average - score);
-              elastic.insertAverage(average.average, id);
+            console.log('RESULT', average, 'CURRENT', score.userHealth, 'DIFF', average - score.userHealth);
+            if (average - score.userHealth > 0.2) {
+              console.log('CRITICAL SCORE DROP!!!! ==>>>>', average- score.userHealth);
+              elastic.insertCritical(score.userHealth, id);
             }
-            console.log('RESULT', average, 'CURRENT', score);
           })
           .catch((err) => { console.log(err); });
       });

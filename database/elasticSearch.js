@@ -24,4 +24,13 @@ module.exports = {
       date: new Date().toISOString(),
     },
   }),
+  insertCritical: (avg, userId) => client.index({
+    index: 'critical_health',
+    type: 'critical_health',
+    body: {
+      avg,
+      userId,
+      date: new Date().toISOString(),
+    },
+  }),
 };
