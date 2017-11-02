@@ -5,6 +5,12 @@ const dbHelpers = require('../database/dbHelpers.js');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
 const elastic = require('../database/elasticSearch.js');
+const AWS = require('aws-sdk');
+
+
+AWS.config.loadFromPath('../AWSConfig.json');
+const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+
 
 if (cluster.isMaster) {
   for (let i = 0; i < cpuCount; i += 1) {
@@ -16,7 +22,9 @@ if (cluster.isMaster) {
 } else {
   const App = express();
 
+
   App.use(bodyParser.json());
+
 
   App.get('/', (req, res) => {
     console.log('router /');
@@ -30,6 +38,7 @@ if (cluster.isMaster) {
       });
   });
 
+
   App.post('/adclicked', (req, res) => {
     console.log('router adClicked');
     res.status(200)
@@ -37,43 +46,39 @@ if (cluster.isMaster) {
     //  post job to queue for tim
   });
 
+
   App.post('/sessionEnd', (req, res) => {
-    ////////////////////////////////
-    // JUST WRITE JOB TO QUEUE   //
-    //////////////////////////////
-    const id = req.body.id;
+    let count = 1;
+    const { id } = req.body;
     const score = helpers.calculateScore(req.body);
     const user = {
       id,
       score: score.userHealth,
     };
-    dbHelpers.insertHealth(user)
-      .then(result => dbHelpers.updateUserAverage(result))
-      .then(({ average }) => {
-        if (average - score.userHealth > 0.2) {
-          // elastic.insertCritical(score.userHealth, id);
-          //  add a job to casey's queue
-        }
-      })
-      .catch((err) => { console.log(err); });
-    // elastic.insertHealth(score);
-
-
-    const analyticsFormat = {
-      userId: 12345,
-      aClicks: {
-        cat1: 1,
-        cat2: 0,
-        cat3: 5,
+    let params = {
+      MessageGroupId: 'analysis',
+      MessageAttributes: {
+        user: {
+          DataType: "String",
+          StringValue: JSON.stringify(user),
+        },
+        // res,
       },
-      aServed: 8,
-      pClicked: 12,
-      pServed: 32,
+      MessageBody: JSON.stringify(user),
+      QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analasysIn.fifo',
     };
-    res.status(200)
-      .send(analyticsFormat);
+
+    sqs.sendMessage(params, (err, data) => {
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Success', data.MessageId);
+      }
+    });
+    count += 1;
   });
 
+  
   App.listen(8080, () => {
     console.log('the server is listening on 8080');
   });
