@@ -91,6 +91,7 @@ const makeUsersBehave = (userLimit) => {
   let minUserId = 9875;
   let maxUserId = 9900;
   while (maxUserId <= userLimit + 9875) {
+    console.log('MAXUSERIDMAXUSERID',maxUserId);
     let users;
     db.getUsers(minUserId, maxUserId)
       .then((rawUsers) => {
@@ -103,17 +104,17 @@ const makeUsersBehave = (userLimit) => {
             .catch((err) => { console.log(err); });
         });
       });
-    minUserId += maxUserId + 1;
-    maxUserId += 25;
+    minUserId = maxUserId + 1;
+    maxUserId += 3;
   }
 };
 
 
 module.exports = {
   runSim: () => {
-    setInterval(() => { makeUsersBehave(100); }, 100);
+    setInterval(() => { makeUsersBehave(50); }, 150);
     // makeUsersBehave(100);
-    // makeUsersBehave();
+    // makeUsersBehave(100);
     // makeUsersBehave();
     // makeUsersBehave();
   },

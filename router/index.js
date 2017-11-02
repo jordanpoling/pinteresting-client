@@ -38,24 +38,25 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
+    ////////////////////////////////
+    // JUST WRITE JOB TO QUEUE   //
+    //////////////////////////////
     const id = req.body.id;
-    console.log(req.body);
     const score = helpers.calculateScore(req.body);
     const user = {
       id,
       score: score.userHealth,
     };
-    console.log('USERUSERUSER', user)
     dbHelpers.insertHealth(user)
       .then(result => dbHelpers.updateUserAverage(result))
       .then(({ average }) => {
         if (average - score.userHealth > 0.2) {
-          elastic.insertCritical(score.userHealth, id);
+          // elastic.insertCritical(score.userHealth, id);
           //  add a job to casey's queue
         }
       })
       .catch((err) => { console.log(err); });
-    elastic.insertHealth(score);
+    // elastic.insertHealth(score);
 
 
     const analyticsFormat = {

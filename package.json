@@ -26,7 +26,7 @@
     "node-inspector": "^1.1.1"
   },
   "dependencies": {
-    "aws-sdk": "^2.138.0",
+    "aws-sdk": "^2.142.0",
     "axios": "^0.17.0",
     "body-parser": "^1.18.2",
     "bookshelf": "^0.10.4",

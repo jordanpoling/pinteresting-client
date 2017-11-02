@@ -46,6 +46,7 @@ module.exports = {
     });
   },
   getUsers: (min, max) => {
+    console.log('MINMIN', min, 'MAXMAX', max);
     return db.any(`SELECT * FROM users WHERE id >= ${min} AND id <= ${max}`)
       .catch((err) =>{console.log(err)});
   },
