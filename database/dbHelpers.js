@@ -1,5 +1,8 @@
 const db = require('../database/index.js');
 const moment = require('moment');
+const fs = require('fs');
+const copyFrom = require('pg-copy-streams').from;
+const pg = require('pg');
 
 //  CONSOLIDATE THESE TO A SINGLE QUERY
 
@@ -24,6 +27,24 @@ module.exports = {
     RETURNING id, score_sum / session_entries AS average
     `)
       .catch((err) => { console.log('line 39 db helpers', err); });
+  },
+  bulkInsertUsers: (file) => {
+    const client = new pg.Client({
+      host: 'localhost',
+      port: 5432,
+      database: 'users',
+      user: 'Jordan',
+      password: '',
+      poolSize: 100,
+    });
+    client.connect((error, client, done) => {
+      const stream = client.query(copyFrom('COPY users (ratio_threshold,interests,pin_click_freq,user_name,gender,location,age) FROM STDIN WITH csv'));
+      const fileStream = fs.createReadStream(file);
+      fileStream.on('error', (err) => {console.log(err)});
+      stream.on('error', (err) => {console.log(err)});
+      stream.on('end', (err) => {console.log(err)});
+      fileStream.pipe(stream);
+    });
   },
 };
 

@@ -1,4 +1,0 @@
-ratioThreshold,userID,interests,pinClickFreq,userName,gender,location,age
-0.145,0,"{""food"":0.84,""fashion"":0.27,""products"":0.82,""sports"":0.79,""travel"":1,""events"":0.84,""design"":0.06,""entertainment"":0,""DIY/crafts"":0.44,""photography"":0.76}",0.35,Olivia Lantaff,female,Kingstown,15
-0.128,1,"{""food"":0.65,""fashion"":0.93,""products"":0.83,""sports"":0.93,""travel"":0.41,""events"":0.84,""design"":0.3,""entertainment"":0.66,""DIY/crafts"":0.37,""photography"":0.21}",0.35,Stephen Trojanowski,female,Laventille,16
-0.047,2,"{""food"":0.43,""fashion"":0.09,""products"":0.91,""sports"":0.48,""travel"":0.33,""events"":0.12,""design"":0.43,""entertainment"":0.89,""DIY/crafts"":0.34,""photography"":0.88}",0.35,Leonel Trojanowski,male,Bangui,15

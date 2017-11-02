@@ -1,10 +1,11 @@
-const name = require('node-random-name');
+const faker = require('faker');
 const loc = require('random-world');
 const age = require('random-age');
 const csvWriter = require('csv-write-stream');
 const fs = require('fs');
+const dbHelpers = require('../database/dbHelpers.js');
 
-const writer = csvWriter();
+const writer = csvWriter({ sendHeaders: false });
 let globalId = 0;
 
 
@@ -20,9 +21,10 @@ const pinClickGenerator = () => {
 const genderGenerator = () => {
   const chance = Math.random();
   const gender = chance > 0.5 ? 'male' : 'female';
+  const name = faker.name.findName();
   const result = {
     gender,
-    name: name({ gender }),
+    name,
   };
   return result;
 };
@@ -46,6 +48,7 @@ const ratioThresholdGenerator = () => {
   return ratio;
 };
 
+
 const interestGenerator = () => {
   const chance = () => Math.round(Math.random() * 100) / 100;
   const interests = {
@@ -63,25 +66,37 @@ const interestGenerator = () => {
   return interests;
 };
 
+
 const userGenerator = () => {
   const genderAndName = genderGenerator();
   const userResult = {
-    ratioThreshold: ratioThresholdGenerator(),
-    userID: globalId,
+    ratio_threshold: ratioThresholdGenerator(),
+    // id: globalId,
     interests: JSON.stringify(interestGenerator()),
-    pinClickFreq: pinClickGenerator(),
-    userName: genderAndName.name,
+    pin_click_freq: pinClickGenerator(),
+    user_name: genderAndName.name,
     gender: genderAndName.gender,
     location: locationGenerator(),
     age: ageGenerator(),
   };
-  globalId += 1;
   return userResult;
 };
 
-writer.pipe(fs.createWriteStream('users.csv'));
-writer.write(userGenerator());
-writer.write(userGenerator());
-writer.write(userGenerator());
+
+const runGenerator = (numberOfUsers) => {
+  writer.pipe(fs.createWriteStream('users.csv'));
+  while (globalId < numberOfUsers) {
+    const user = userGenerator();
+    writer.write(user);
+    globalId += 1;
+  }
+};
+
+
+runGenerator(500000);
+
 writer.end();
-console.log(userGenerator());
+
+dbHelpers.bulkInsertUsers('users.csv');
+
+console.log('USER BATCH COMPLETE');
