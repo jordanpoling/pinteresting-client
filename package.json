@@ -17,12 +17,13 @@
   },
   "homepage": "https://github.com/jordanpoling/hrsf82-thesis#readme",
   "devDependencies": {
-    "node-inspector": "^1.1.1",
     "eslint": "^4.9.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.4.0"
+    "eslint-plugin-react": "^7.4.0",
+    "faker": "^4.1.0",
+    "node-inspector": "^1.1.1"
   },
   "dependencies": {
     "aws-sdk": "^2.138.0",
@@ -31,15 +32,21 @@
     "bookshelf": "^0.10.4",
     "chai": "^4.1.2",
     "chai-http": "^3.0.0",
+    "csv-write-stream": "^2.0.0",
     "elasticsearch": "^13.3.1",
     "express": "^4.16.2",
     "knex": "^0.13.0",
     "mocha": "^4.0.1",
     "moment": "^2.19.1",
+    "node-random-name": "^1.0.1",
     "nodemon": "^1.12.1",
     "pg": "^7.3.0",
+    "pg-copy-streams": "^1.2.0",
     "pg-promise": "^7.0.3",
     "postgresql": "0.0.1",
+    "random-age": "^1.0.2",
+    "random-decimal": "^1.0.2",
+    "random-world": "^1.2.1",
     "redis": "^2.8.0"
   }
 }

@@ -45,16 +45,14 @@ if (cluster.isMaster) {
       score: score.userHealth,
     };
     dbHelpers.insertHealth(user)
-      .then((result) => {
-        dbHelpers.updateUserAverage(result)
-          .then(({ average }) => {
-            if (average - score.userHealth > 0.2) {
-              elastic.insertCritical(score.userHealth, id);
-              //  add a job to casey's queue
-            }
-          })
-          .catch((err) => { console.log(err); });
-      });
+      .then(result => dbHelpers.updateUserAverage(result))
+      .then(({ average }) => {
+        if (average - score.userHealth > 0.2) {
+          elastic.insertCritical(score.userHealth, id);
+          //  add a job to casey's queue
+        }
+      })
+      .catch((err) => { console.log(err); });
     elastic.insertHealth(score);
     const analyticsFormat = {
       userId: 12345,
