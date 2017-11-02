@@ -46,5 +46,9 @@ module.exports = {
       fileStream.pipe(stream);
     });
   },
+  getUsers: (rangeString) => {
+    db.any(`SELECT * FROM users WHERE id ${rangeString}`)
+      .catch((err) =>{console.log(err)});
+  },
 };
 
