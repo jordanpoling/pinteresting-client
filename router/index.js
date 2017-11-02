@@ -38,12 +38,14 @@ if (cluster.isMaster) {
   });
 
   App.post('/sessionEnd', (req, res) => {
-    const id = req.body.userId;
+    const id = req.body.id;
+    console.log(req.body);
     const score = helpers.calculateScore(req.body);
     const user = {
       id,
       score: score.userHealth,
     };
+    console.log('USERUSERUSER', user)
     dbHelpers.insertHealth(user)
       .then(result => dbHelpers.updateUserAverage(result))
       .then(({ average }) => {
@@ -54,6 +56,8 @@ if (cluster.isMaster) {
       })
       .catch((err) => { console.log(err); });
     elastic.insertHealth(score);
+
+
     const analyticsFormat = {
       userId: 12345,
       aClicks: {

@@ -1,54 +1,14 @@
 const axios = require('axios');
-
-const active = 0.5;
-const picky = 0.35;
-const occa = 0.3;
+const db = require('../database/dbHelpers.js');
 
 let count = 0;
 
-const rawUsers = [
-  {
-    userID: 123,
-    interests: {
-      technology: 0.1,
-      skateboarding: 0.25,
-      supreme: 0.25,
-      noodels: 0.50,
-    },
-    pinClickFreq: occa,
-    userName: 'Jordan',
-  },
-  {
-    userID: 1234,
-    interests: {
-      technology: 0.4,
-      skateboarding: 0.25,
-      supreme: 0.50,
-      noodels: 0.25,
-    },
-    pinClickFreq: picky,
-    userName: 'Tim',
-  },
-  {
-    userID: 12345,
-    interests: {
-      technology: 0.2,
-      skateboarding: 0.50,
-      supreme: 0.25,
-      noodels: 0.25,
-    },
-    pinClickFreq: occa,
-    userName: 'Devon',
-  },
-];
-
-
 class User {
   constructor({
-    userID, interests, pinClickFreq, userName,
+    id, interests, pin_click_freq, user_name,
   }) {
     this.clickResults = {
-      userId: userID,
+      id,
       total: 0,
       aInteractions: {},
       pClicked: 0,
@@ -57,8 +17,8 @@ class User {
       totalAdInt: 0,
     };
     this.interests = interests;
-    this.pinClickFreq = pinClickFreq;
-    this.userName = userName;
+    this.pinClickFreq = pin_click_freq;
+    this.userName = user_name;
 
 
     this.funnelDepth = ({ ad_group, id }) => {
@@ -85,7 +45,7 @@ class User {
     this.userInteractions = (ads) => {
       for (let i = 0; i < 32; i += 1) {
         const probability = Math.random();
-        if (probability < pinClickFreq) {
+        if (probability < this.pinClickFreq) {
           this.clickResults.pClicked += 1;
         }
       }
@@ -119,30 +79,40 @@ class User {
 
 const makeActiveUsers = (usersForClass) => {
   const result = [];
-  usersForClass.forEach((user) => {
-    result.push(new User(user));
-  });
+  for (const key in usersForClass) {
+    result.push(new User(usersForClass[key]));
+  }
+  console.log(result);
   return result;
 };
 
 
-const makeUsersBehave = () => {
-  const users = makeActiveUsers(rawUsers);
-  users.forEach((user) => {
-    user.login()
-      .then((ads) => {
-        user.userInteractions(ads.data);
-      })
-      .catch((err) => { console.log(err); });
-  });
+const makeUsersBehave = (userLimit) => {
+  let minUserId = 9875;
+  let maxUserId = 9900;
+  while (maxUserId <= userLimit + 9875) {
+    let users;
+    db.getUsers(minUserId, maxUserId)
+      .then((rawUsers) => {
+        users = makeActiveUsers(rawUsers);
+        users.forEach((user) => {
+          user.login()
+            .then((ads) => {
+              user.userInteractions(ads.data);
+            })
+            .catch((err) => { console.log(err); });
+        });
+      });
+    minUserId += maxUserId + 1;
+    maxUserId += 25;
+  }
 };
 
 
 module.exports = {
   runSim: () => {
-    // makeUsersBehave(userList);
-    setInterval(() => { makeUsersBehave(); }, 20);
-    // makeUsersBehave();
+    setInterval(() => { makeUsersBehave(100); }, 100);
+    // makeUsersBehave(100);
     // makeUsersBehave();
     // makeUsersBehave();
     // makeUsersBehave();

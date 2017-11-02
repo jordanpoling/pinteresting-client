@@ -13,8 +13,7 @@ module.exports = {
     db.none(`
     UPDATE users SET average = ${average}, average_at = now() 
     WHERE users.id = ${id}
-    AND (average IS NULL OR average_at < ${yesterday.format('\'YYYY-MM-DD HH:mm:ss\'')})
-    RETURNING score_sum / session_entries AS average;
+    AND (average IS NULL OR average_at < ${yesterday.format('\'YYYY-MM-DD HH:mm:ss\'')});
     `).then((result) => { console.log('success', result); })
       .catch((err) => { console.log(err); });
     return db.one(`SELECT score_sum / session_entries AS average
@@ -46,8 +45,8 @@ module.exports = {
       fileStream.pipe(stream);
     });
   },
-  getUsers: (rangeString) => {
-    db.any(`SELECT * FROM users WHERE id ${rangeString}`)
+  getUsers: (min, max) => {
+    return db.any(`SELECT * FROM users WHERE id >= ${min} AND id <= ${max}`)
       .catch((err) =>{console.log(err)});
   },
 };
