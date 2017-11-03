@@ -56,16 +56,15 @@ if (cluster.isMaster) {
       score: score.userHealth,
     };
     let params = {
-      MessageGroupId: 'analysis',
+      // MessageGroupId: 'analysis',
       MessageAttributes: {
         user: {
           DataType: "String",
           StringValue: JSON.stringify(user),
         },
-        // res,
       },
       MessageBody: JSON.stringify(user),
-      QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analasysIn.fifo',
+      QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
     };
 
     sqs.sendMessage(params, (err, data) => {

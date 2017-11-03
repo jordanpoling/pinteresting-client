@@ -47,6 +47,7 @@
     "random-age": "^1.0.2",
     "random-decimal": "^1.0.2",
     "random-world": "^1.2.1",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "sqs-consumer": "^3.8.0"
   }
 }
