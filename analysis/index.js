@@ -51,7 +51,7 @@ const work = (messages) => {
           //  add a job to casey's queue
         }
       })
-      .catch((err) => { console.log(err); });
+      .catch((err) => { console.log(err) });
     elastic.insertHealth(score);
   });
   
