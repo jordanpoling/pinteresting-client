@@ -66,9 +66,12 @@ class User {
           }
         }
       });
-      axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
-        console.log(error);
-      });
+      const send = () => {
+        axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
+          console.log(error);
+        });
+      };
+      setTimeout(send, 30);
     };
     this.login = () => axios.get('http://localhost:8080/').catch((error) => {
       console.log(error);
@@ -91,7 +94,7 @@ const makeUsersBehave = (userLimit) => {
   let minUserId = 9875;
   let maxUserId = 9900;
   while (maxUserId <= userLimit + 9875) {
-    console.log('MAXUSERIDMAXUSERID',maxUserId);
+    console.log('MAXUSERIDMAXUSERID', maxUserId);
     let users;
     db.getUsers(minUserId, maxUserId)
       .then((rawUsers) => {
@@ -112,7 +115,7 @@ const makeUsersBehave = (userLimit) => {
 
 module.exports = {
   runSim: () => {
-    setInterval(() => { makeUsersBehave(50); }, 150);
+    setInterval(() => { makeUsersBehave(10000); }, 200);
     // makeUsersBehave(100);
     // makeUsersBehave(100);
     // makeUsersBehave();

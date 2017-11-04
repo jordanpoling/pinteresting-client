@@ -58,10 +58,10 @@ if (cluster.isMaster) {
     let params = {
       // MessageGroupId: 'analysis',
       MessageAttributes: {
-        user: {
-          DataType: "String",
-          StringValue: JSON.stringify(user),
-        },
+        // user: {
+        //   DataType: "String",
+        //   StringValue: JSON.stringify(user),
+        // },
       },
       MessageBody: JSON.stringify(user),
       QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
