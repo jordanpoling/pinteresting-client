@@ -23,7 +23,6 @@ if (cluster.isMaster) {
 
 
   App.get('/', (req, res) => {
-    // console.log('router /');
     helpers.getAds()
       .then((response) => {
         res.status(200);
@@ -36,10 +35,8 @@ if (cluster.isMaster) {
 
 
   App.post('/adclicked', (req, res) => {
-    // console.log('router adClicked');
     res.status(200)
       .send();
-    //  post job to queue for tim
   });
 
 
