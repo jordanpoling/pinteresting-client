@@ -1,7 +1,13 @@
 const axios = require('axios');
 const db = require('../database/dbHelpers.js');
+const helpers = require('../router/helpers');
+const AWS = require('aws-sdk');
 
 let count = 0;
+
+AWS.config.loadFromPath('../AWSConfig.json');
+const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+
 
 class User {
   constructor({
@@ -21,24 +27,41 @@ class User {
     this.userName = user_name;
 
 
+    const send = (params) => {
+      sqs.sendMessage(params, (err, data) => {
+        if (err) {
+          console.log('Error', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
+    };
+
+
     this.funnelDepth = ({ ad_group, id }) => {
       const probability = Math.random();
-      if (probability < this.interests[ad_group] * 0.15) {
-        console.log('conversion');
-        axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'conversion' }).catch((error) => {
-          console.log('adClicked', error);
-        });
-      } else if (probability < this.interests[ad_group] * 0.5) {
-        console.log('clicked');
-        axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'engagement' }).catch((error) => {
-          console.log('adClicked', error);
-        });
-      } else if (probability < this.interests[ad_group]) {
-        console.log('impression');
-        axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'impression' }).catch((error) => {
-          console.log('adClicked', error);
-        });
-      }
+      const getFunnelResults = () => {
+        let params = {
+          MessageAttributes: {
+          },
+          MessageBody: '',
+          QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/toDatabase',
+        };
+        if (probability < this.interests[ad_group] * 0.15) {
+          params.MessageBody = JSON.stringify({ group: ad_group, id: 'conversion' });
+          send(params);
+        } else if (probability < this.interests[ad_group] * 0.5) {
+          params.MessageBody = JSON.stringify({ group: ad_group, id: 'engagement' });
+          send(params);
+        } else if (probability < this.interests[ad_group]) {
+          params.MessageBody = JSON.stringify({ group: ad_group, id: 'impression' });
+          send(params);
+          axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'impression' }).catch((error) => {
+            console.log('adClicked', error);
+          });
+        }
+      };
+      getFunnelResults();
     };
 
 
@@ -53,7 +76,6 @@ class User {
       ads.ads.forEach((ad) => {
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
-          console.log('count: ', count);
           count += 1;
           this.funnelDepth(ad);
           if (this.clickResults.aInteractions[ad.ad_group]) {
@@ -66,12 +88,26 @@ class User {
           }
         }
       });
-      const send = () => {
-        axios.post('http://localhost:8080/sessionEnd', this.clickResults).catch((error) => {
-          console.log(error);
-        });
+      const { id } = this.clickResults;
+      const score = helpers.calculateScore(this.clickResults);
+      const user = {
+        id,
+        score: score.userHealth,
       };
-      setTimeout(send, 30);
+      const params = {
+        MessageAttributes: {
+        },
+        MessageBody: JSON.stringify(user),
+        QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
+      };
+  
+      sqs.sendMessage(params, (err, data) => {
+        if (err) {
+          console.log('Error', err);
+        } else {
+          console.log('Success', data.MessageId);
+        }
+      });
     };
     this.login = () => axios.get('http://localhost:8080/').catch((error) => {
       console.log(error);
@@ -85,40 +121,38 @@ const makeActiveUsers = (usersForClass) => {
   for (const key in usersForClass) {
     result.push(new User(usersForClass[key]));
   }
-  console.log(result);
   return result;
 };
 
 
 const makeUsersBehave = (userLimit) => {
+  userLimit = 1000;
   let minUserId = 9875;
   let maxUserId = 9900;
   while (maxUserId <= userLimit + 9875) {
-    console.log('MAXUSERIDMAXUSERID', maxUserId);
     let users;
-    db.getUsers(minUserId, maxUserId)
-      .then((rawUsers) => {
-        users = makeActiveUsers(rawUsers);
-        users.forEach((user) => {
-          user.login()
-            .then((ads) => {
-              user.userInteractions(ads.data);
-            })
-            .catch((err) => { console.log(err); });
+    const behavior = () => {
+      db.getUsers(minUserId, maxUserId)
+        .then((rawUsers) => {
+          users = makeActiveUsers(rawUsers);
+          users.forEach((user) => {
+            user.login()
+              .then((ads) => {
+                ads ? user.userInteractions(ads.data) : null;
+              })
+              .catch((err) => { console.log(err); });
+          });
         });
-      });
+    };
+    behavior();
     minUserId = maxUserId + 1;
-    maxUserId += 3;
+    maxUserId += 100;
   }
 };
 
 
 module.exports = {
   runSim: () => {
-    setInterval(() => { makeUsersBehave(10000); }, 200);
-    // makeUsersBehave(100);
-    // makeUsersBehave(100);
-    // makeUsersBehave();
-    // makeUsersBehave();
+    setInterval(makeUsersBehave, 3500);
   },
 };

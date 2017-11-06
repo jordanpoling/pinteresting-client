@@ -51,7 +51,7 @@ const work = (messages) => {
           //  add a job to casey's queue
         }
       })
-      .catch((err) => { console.log(err); });
+      .catch((err) => { console.log(err) });
     elastic.insertHealth(score);
   });
   
@@ -62,13 +62,13 @@ const processMessages = () => {
     if (err) {
       console.log('Receive Error', err);
     } if (data.Messages) {
-      console.log('MESSAGESMESSAGESMESSAGES', data.Messages);
+      // console.log('MESSAGESMESSAGESMESSAGES', data.Messages);
       work(data.Messages);
       messagesToDelete = []
       data.Messages.forEach((message)=>{
         messagesToDelete.push({Id: message.MessageId, ReceiptHandle: message.ReceiptHandle});
       });
-      console.log('MESSAGES TO DELETE MESSAGES TO DELETE', messagesToDelete)
+      // console.log('MESSAGES TO DELETE MESSAGES TO DELETE', messagesToDelete)
       const deleteParams = {
         QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
         Entries: messagesToDelete,
@@ -79,11 +79,11 @@ const processMessages = () => {
         if (err) {
           console.log('Delete Error', err);
         } else {
-          console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
+          // console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
         }
       });
     }
   });
 };
-setInterval(processMessages, 10);
+setInterval(processMessages, 20);
 // }
