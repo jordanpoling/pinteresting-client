@@ -48,21 +48,12 @@ class User {
           QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/toDatabase',
         };
         if (probability < this.interests[ad_group] * 0.15) {
-          console.log('conversion');
           params.MessageBody = JSON.stringify({ group: ad_group, id: 'conversion' });
           send(params);
-          // axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'conversion' }).catch((error) => {
-          //   console.log('adClicked', error);
-          // });
         } else if (probability < this.interests[ad_group] * 0.5) {
           params.MessageBody = JSON.stringify({ group: ad_group, id: 'engagement' });
           send(params);
-          console.log('clicked');
-          // axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'engagement' }).catch((error) => {
-          //   console.log('adClicked', error);
-          // });
         } else if (probability < this.interests[ad_group]) {
-          console.log('impression');
           params.MessageBody = JSON.stringify({ group: ad_group, id: 'impression' });
           send(params);
           axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'impression' }).catch((error) => {
@@ -85,7 +76,6 @@ class User {
       ads.ads.forEach((ad) => {
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
-          console.log('count: ', count);
           count += 1;
           this.funnelDepth(ad);
           if (this.clickResults.aInteractions[ad.ad_group]) {
@@ -98,8 +88,6 @@ class User {
           }
         }
       });
-
-      //  this is where the sqs send will go
       const { id } = this.clickResults;
       const score = helpers.calculateScore(this.clickResults);
       const user = {
@@ -133,16 +121,15 @@ const makeActiveUsers = (usersForClass) => {
   for (const key in usersForClass) {
     result.push(new User(usersForClass[key]));
   }
-  // console.log(result);
   return result;
 };
 
 
 const makeUsersBehave = (userLimit) => {
+  userLimit = 1000;
   let minUserId = 9875;
   let maxUserId = 9900;
   while (maxUserId <= userLimit + 9875) {
-    // console.log('MAXUSERIDMAXUSERID', maxUserId);
     let users;
     const behavior = () => {
       db.getUsers(minUserId, maxUserId)
@@ -159,13 +146,13 @@ const makeUsersBehave = (userLimit) => {
     };
     behavior();
     minUserId = maxUserId + 1;
-    maxUserId += 3;
+    maxUserId += 100;
   }
 };
 
 
 module.exports = {
   runSim: () => {
-    setInterval(() => { makeUsersBehave(10000); }, 1);
+    setInterval(makeUsersBehave, 3500);
   },
 };

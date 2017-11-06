@@ -23,7 +23,7 @@ if (cluster.isMaster) {
 
 
   App.get('/', (req, res) => {
-    console.log('router /');
+    // console.log('router /');
     helpers.getAds()
       .then((response) => {
         res.status(200);
@@ -36,16 +36,12 @@ if (cluster.isMaster) {
 
 
   App.post('/adclicked', (req, res) => {
-    console.log('router adClicked');
+    // console.log('router adClicked');
     res.status(200)
       .send();
     //  post job to queue for tim
   });
 
-
-  App.post('/sessionEnd', (req, res) => {
-
-  });
 
   App.listen(8080, () => {
     console.log('the server is listening on 8080');
