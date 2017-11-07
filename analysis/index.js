@@ -24,15 +24,19 @@ const work = (messages) => {
     const body = JSON.parse(element.Body);
     const { score } = body;
     const { id } = body;
+    const { adInteractions } = body;
     const user = {
       id,
       score,
+      adClicks,
+      scoreDropped: false,
     };
     dbHelpers.insertHealth(user)
       .then(result =>
         dbHelpers.updateUserAverage(result))
       .then(({ average }) => {
         if (average - score > 0.2) {
+          user.scoreDropped = true;
           elastic.insertCritical(score.userHealth, id);
           //  add a job to casey's queue
         }

@@ -1,3 +1,6 @@
+const helpers = require('./helpers.js');
+const sqs = require('./sqsHelpers.js');
+
 module.exports.Class = class User {
   constructor({
     id, interests, pin_click_freq, user_name,
@@ -19,24 +22,25 @@ module.exports.Class = class User {
     this.funnelDepth = ({ ad_group, id }) => {
       const probability = Math.random();
       const getFunnelResults = () => {
+        console.log('FUNNELDEPTHFUNNELDEPTHFUNNELDEPTHFUNNELDEPTHFUNNELDEPTH')
         const params = {
           MessageAttributes: {
           },
           MessageBody: '',
-          QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/toDatabase',
+          QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_advertisements',
         };
         if (probability < this.interests[ad_group] * 0.15) {
-          params.MessageBody = JSON.stringify({ group: ad_group, id: 'conversion' });
+          console.log('conversion');
+          params.MessageBody = JSON.stringify({ group: ad_group, type: 'conversion', id });
           sqs.send(params);
         } else if (probability < this.interests[ad_group] * 0.5) {
-          params.MessageBody = JSON.stringify({ group: ad_group, id: 'engagement' });
+          console.log('engagement');
+          params.MessageBody = JSON.stringify({ group: ad_group, type: 'engagement', id });
           sqs.send(params);
         } else if (probability < this.interests[ad_group]) {
-          params.MessageBody = JSON.stringify({ group: ad_group, id: 'impression' });
+          console.log('impression');
+          params.MessageBody = JSON.stringify({ group: ad_group, type: 'impression', id });
           sqs.send(params);
-          axios.post('http://localhost:8080/adClicked', { group: ad_group, id: 'impression' }).catch((error) => {
-            console.log('adClicked', error);
-          });
         }
       };
       getFunnelResults();
@@ -50,8 +54,9 @@ module.exports.Class = class User {
           this.clickResults.pClicked += 1;
         }
       }
-      this.clickResults.aServed = ads.ads.length;
-      ads.ads.forEach((ad) => {
+      this.clickResults.aServed = ads.length;
+      ads.forEach((ad) => {
+        console.log('ADADADADADADADADADADADA',ad)
         const probability = Math.random();
         if (probability < this.interests[ad.ad_group]) {
           this.funnelDepth(ad);
@@ -66,16 +71,18 @@ module.exports.Class = class User {
         }
       });
       const { id } = this.clickResults;
+      const { aInteractions } = this.clickResults;
       const score = helpers.calculateScore(this.clickResults);
       const user = {
         id,
         score: score.userHealth,
+        adClicks: aInteractions,
       };
       const params = {
         MessageAttributes: {
         },
         MessageBody: JSON.stringify(user),
-        QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/analytics_client',
       };
       sqs.send(params);
     };

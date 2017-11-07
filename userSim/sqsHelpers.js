@@ -18,9 +18,10 @@ module.exports = {
       if (err) {
         console.log('Receive Error', err);
       } if (data.Messages) {
+        // console.log(data)
         callback(data.Messages);
         data.Messages.forEach((message) => {
-          deleteParams.entries.push({ 
+          deleteParams.Entries.push({
             Id: message.MessageId, ReceiptHandle: message.ReceiptHandle,
           });
         });
@@ -34,5 +35,4 @@ module.exports = {
       }
     });
   },
-
 };

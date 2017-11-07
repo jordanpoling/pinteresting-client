@@ -2,7 +2,7 @@ const axios = require('axios');
 const db = require('../database/dbHelpers.js');
 const helpers = require('./helpers');
 const sqs = require('./sqsHelpers.js');
-const User = require('./User').class;
+const User = require('./UserClass.js').class;
 
 
 const makeAdRequestForUsers = (userLimit) => {
