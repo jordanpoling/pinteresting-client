@@ -10,21 +10,18 @@ const makeAdRequestForUsers = (userLimit) => {
   let maxUserId = 9900;
   while (maxUserId <= userLimit + 9875) {
     let users;
-    db.getUsers(minUserId, maxUserId)
+    db.getUsersForAdRequest(minUserId, maxUserId)
       .then((rawUsers) => {
+        console.log(rawUsers)
         users = helpers.makeActiveUsers(rawUsers);
         users.forEach((user) => {
           user.login();
         });
-      });
+      })
+      .catch((err) => {console.log(err)})
     minUserId = maxUserId + 1;
     maxUserId += 100;
   }
 };
-
-
-module.exports = {
-  requestAds: () => {
-    setInterval(() => {makeAdRequestForUsers(1000)}, 3500);
-  },
-};
+// setInterval(() => {makeAdRequestForUsers(1000)}, 3500);
+makeAdRequestForUsers(100);

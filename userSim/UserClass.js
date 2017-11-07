@@ -72,6 +72,7 @@ module.exports.Class = class User {
       });
       const { id } = this.clickResults;
       const { aInteractions } = this.clickResults;
+      console.log('AINTERACTIONSAINTERACTONS',aInteractions)
       const score = helpers.calculateScore(this.clickResults);
       const user = {
         id,
@@ -82,7 +83,7 @@ module.exports.Class = class User {
         MessageAttributes: {
         },
         MessageBody: JSON.stringify(user),
-        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/analytics_client',
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_analysis',
       };
       sqs.send(params);
     };
@@ -92,7 +93,7 @@ module.exports.Class = class User {
       const params = {
         MessageAttributes: {
         },
-        MessageBody: '',
+        MessageBody: JSON.stringify(this.clickResults.id),
         QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_request',
       };
       sqs.send(params);

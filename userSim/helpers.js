@@ -1,4 +1,4 @@
-const Axios = require('axios');
+const User = require('./UserClass.js').Class;
 
 module.exports = {
   makeActiveUsers: (usersForClass) => {
@@ -12,10 +12,10 @@ module.exports = {
     return Axios.get('http://localhost:3001/');
   },
   calculateScore: ({
-    userId, pClicked, pServed, aServed, aInteractions,
+    userId, pClicked, pServed, aServed, totalAdInt,
   }) => {
     const result = {
-      userHealth: parseFloat((pClicked / pServed) + (aServed + aInteractions)),
+      userHealth: parseFloat((pClicked / pServed) + (aServed / totalAdInt)),
       userId,
       date: new Date(),
     };
