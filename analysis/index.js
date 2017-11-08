@@ -6,6 +6,14 @@ const cpuCount = require('os').cpus().length;
 const elastic = require('../database/elasticSearch.js');
 const AWS = require('aws-sdk');
 const sqs = require('../userSim/sqsHelpers.js');
+const winston = require('winston');
+
+let logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: './sim.log' }),
+  ],
+});
 
 
 // if (cluster.isMaster) {
@@ -18,7 +26,7 @@ const sqs = require('../userSim/sqsHelpers.js');
 // } else {
 console.log('worker initialized');
 
-
+let counter = 0;
 const work = (messages) => {
   messages.forEach((element) => {
     const body = JSON.parse(element.Body);
@@ -37,13 +45,15 @@ const work = (messages) => {
       .then((result) => {
         console.log(result);
         longAverage = result.average;
-        return dbHelpers.updateUserAverage(result)})
+        return dbHelpers.updateUserAverage(result); })
       .then((average) => {
         if (!!((average[0].average * 10) - (longAverage * 10)) / 10 > 0.05) {
           user.scoreDropped = true;
-          elastic.insertCritical(engagementScore, userId);
+          elastic.insertCritical(engagementScore, userId)
+            .catch((err) => { console.log(err); });
         }
-        elastic.insertHealth(engagementScore);
+        elastic.insertHealth(engagementScore)
+          .catch((err) => { console.log(err); });
         const params = {
           MessageAttributes: {
           },
@@ -52,7 +62,9 @@ const work = (messages) => {
         };
         sqs.send(params);
       })
-      .catch((err) => {console.log(err)});
+      .catch((err) => { console.log(err); });
+    logger.log(counter);
+    counter += 1;
   });
 };
 
@@ -73,5 +85,5 @@ const deleteParams = {
 
 
 // sqs.receive(work,receiveParams,deleteParams);
-setInterval(() =>{sqs.receive(work,receiveParams,deleteParams)}, 10);
+setInterval(() => { sqs.receive(work, receiveParams, deleteParams); }, 10);
 // }

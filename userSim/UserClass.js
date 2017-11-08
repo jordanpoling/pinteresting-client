@@ -53,12 +53,15 @@ module.exports.Class = class User {
         };
         if (probability < this.interests[ad_group] * 0.15) {
           params.MessageBody = JSON.stringify({ group: ad_group, type: 'conversion', id });
+          console.log('PARAMS',params)
           sqs.send(params);
         } else if (probability < this.interests[ad_group] * 0.5) {
           params.MessageBody = JSON.stringify({ group: ad_group, type: 'engagement', id });
+          console.log('PARAMS',params)
           sqs.send(params);
         } else if (probability < this.interests[ad_group]) {
           params.MessageBody = JSON.stringify({ group: ad_group, type: 'impression', id });
+          console.log('PARAMS', params)
           sqs.send(params);
         }
       };

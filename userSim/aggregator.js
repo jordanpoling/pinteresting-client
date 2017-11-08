@@ -33,7 +33,7 @@ let params = {
 };
 
 
-setInterval(() =>{sqs.send(params)}, 1000);
+setInterval(() =>{sqs.send(params)}, 10);
 user.userId = 9979;
 params = {
   MessageAttributes: {
@@ -41,7 +41,7 @@ params = {
   MessageBody: JSON.stringify(user),
   QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_response',
 };
-setInterval(() =>{sqs.send(params)}, 1000);
+setInterval(() =>{sqs.send(params)}, 10);
 user.userId = 9977;
 params = {
   MessageAttributes: {
@@ -49,7 +49,7 @@ params = {
   MessageBody: JSON.stringify(user),
   QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_response',
 };
-setInterval(() =>{sqs.send(params)}, 1000);
+setInterval(() =>{sqs.send(params)}, 10);
 user.userId = 9978;
 params = {
   MessageAttributes: {
@@ -57,4 +57,4 @@ params = {
   MessageBody: JSON.stringify(user),
   QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_response',
 };
-setInterval(() =>{sqs.send(params)}, 1000);
+setInterval(() =>{sqs.send(params)}, 10);

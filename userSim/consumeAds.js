@@ -43,5 +43,5 @@ const deleteParams = {
 
 // sqs.receive(makeUsersBehave, receiveParams, deleteParams)
 
-setInterval(() =>{sqs.receive(makeUsersBehave, receiveParams, deleteParams)}, 50);
+setInterval(() =>{sqs.receive(makeUsersBehave, receiveParams, deleteParams)}, 10);
 
