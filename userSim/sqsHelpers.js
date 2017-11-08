@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 
-AWS.config.loadFromPath('../AWSConfig.json');
+// AWS.config.loadFromPath('../AWSConfig.json');
 const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 module.exports = {
@@ -20,6 +20,7 @@ module.exports = {
       } if (data.Messages) {
         // console.log(data)
         callback(data.Messages);
+        deleteParams.Entries = [];
         data.Messages.forEach((message) => {
           deleteParams.Entries.push({
             Id: message.MessageId, ReceiptHandle: message.ReceiptHandle,

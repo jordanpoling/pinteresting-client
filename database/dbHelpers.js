@@ -4,24 +4,23 @@ const fs = require('fs');
 const copyFrom = require('pg-copy-streams').from;
 const pg = require('pg');
 
-//  CONSOLIDATE THESE TO A SINGLE QUERY
 
 module.exports = {
-  updateUserAverage: ({ average, id }) => {
+  updateUserAverage: ({ average, userId }) => {
     const yesterday = moment().subtract(1, 'days');
     db.none(`
     UPDATE users SET average = ${average}, average_at = now() 
-    WHERE users.id = ${id}
+    WHERE users.id = ${userId}
     AND (average IS NULL OR average_at < ${yesterday.format('\'YYYY-MM-DD HH:mm:ss\'')});
     `)
-      .catch((err) => { console.log(err); });
-    return db.one(`SELECT score_sum / session_entries AS average
-      FROM users WHERE id = ${id}`).catch((err) => { console.log(err); });
+      .catch((err) => { console.log('UUA1st',err); });
+    return db.any(`SELECT average
+      FROM users WHERE id = ${userId}`).catch((err) => { console.log('UUA2nd',err); });
   },
-  insertHealth: ({ score, id }) =>
-    db.one(`UPDATE users SET score_sum = score_sum+${score}, session_entries = session_entries + 1
-    WHERE id = ${id}
-    RETURNING id, score_sum / session_entries AS average
+  insertHealth: ({ engagementScore, userId }) =>
+    db.one(`UPDATE users SET score_sum = score_sum+${engagementScore}, session_entries = session_entries + 1
+    WHERE id = ${userId}
+    RETURNING id AS "userId", score_sum / session_entries AS average
     `)
       .catch((err) => { console.log('line 39 db helpers', err); }),  
   bulkInsertUsers: (file) => {

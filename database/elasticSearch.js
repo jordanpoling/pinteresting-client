@@ -6,12 +6,12 @@ const client = new elasticSearch.Client({
 });
 
 module.exports = {
-  insertHealth: ({ userHealth, userId }) => client.index({
+  insertHealth: ({ engagementScore, userId }) => client.index({
     index: 'user_health',
     type: 'user_health',
     body: {
       userId,
-      userHealth,
+      engagementScore,
       date: new Date().toISOString(),
     },
   }),

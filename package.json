@@ -4,7 +4,8 @@
   "description": "Thesis",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "mocha --timeout 1000"
+    "test": "mocha --timeout 1000",
+    "start": "node ./userSim/requestAds.js && node ./userSim/consumeAds.js && node ./analysis/index.js"
   },
   "repository": {
     "type": "git",

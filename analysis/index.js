@@ -1,11 +1,11 @@
 const express = require('express');
-const helpers = require('../router/helpers');
+const helpers = require('../userSim/helpers');
 const dbHelpers = require('../database/dbHelpers.js');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
 const elastic = require('../database/elasticSearch.js');
 const AWS = require('aws-sdk');
-const sqs = require('./sqsHelpers.js');
+const sqs = require('../userSim/sqsHelpers.js');
 
 
 // if (cluster.isMaster) {
@@ -22,27 +22,37 @@ console.log('worker initialized');
 const work = (messages) => {
   messages.forEach((element) => {
     const body = JSON.parse(element.Body);
-    const { score } = body;
-    const { id } = body;
-    const { adInteractions } = body;
+    const { engagementScore } = body;
+    const { userId } = body;
+    const { adClicks } = body;
     const user = {
-      id,
-      score,
+      userId,
+      engagementScore,
       adClicks,
       scoreDropped: false,
     };
+    let longAverage;
+    console.log(user);
     dbHelpers.insertHealth(user)
-      .then(result =>
-        dbHelpers.updateUserAverage(result))
-      .then(({ average }) => {
-        if (average - score > 0.2) {
+      .then((result) => {
+        console.log(result);
+        longAverage = result.average;
+        return dbHelpers.updateUserAverage(result)})
+      .then((average) => {
+        if (!!((average[0].average * 10) - (longAverage * 10)) / 10 > 0.05) {
           user.scoreDropped = true;
-          elastic.insertCritical(score.userHealth, id);
-          //  add a job to casey's queue
+          elastic.insertCritical(engagementScore, userId);
         }
+        elastic.insertHealth(engagementScore);
+        const params = {
+          MessageAttributes: {
+          },
+          MessageBody: JSON.stringify(user),
+          QueueUrl: process.env.ANALYTICS_CLIENT,
+        };
+        sqs.send(params);
       })
       .catch((err) => {console.log(err)});
-    elastic.insertHealth(score);
   });
 };
 
@@ -51,15 +61,17 @@ const receiveParams = {
   MessageAttributeNames: [
     'All',
   ],
-  QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
+  QueueUrl: process.env.CLIENT_ANALYSIS,
   VisibilityTimeout: 10,
   WaitTimeSeconds: 10,
 };
 
 const deleteParams = {
-  QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
-  Entries: messagesToDelete,
+  QueueUrl: process.env.CLIENT_ANALYSIS,
+  Entries: [],
 };
 
-setInterval(sqs.receive(work,receiveParams,deleteParams), 20);
+
+// sqs.receive(work,receiveParams,deleteParams);
+setInterval(() =>{sqs.receive(work,receiveParams,deleteParams)}, 10);
 // }

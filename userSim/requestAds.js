@@ -12,16 +12,15 @@ const makeAdRequestForUsers = (userLimit) => {
     let users;
     db.getUsersForAdRequest(minUserId, maxUserId)
       .then((rawUsers) => {
-        console.log(rawUsers)
         users = helpers.makeActiveUsers(rawUsers);
         users.forEach((user) => {
           user.login();
         });
       })
-      .catch((err) => {console.log(err)})
+      .catch((err) => {console.log(err)});
     minUserId = maxUserId + 1;
     maxUserId += 100;
   }
 };
-// setInterval(() => {makeAdRequestForUsers(1000)}, 3500);
 makeAdRequestForUsers(100);
+// setInterval(() => {makeAdRequestForUsers(100)}, 50);
