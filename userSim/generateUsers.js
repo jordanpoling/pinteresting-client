@@ -5,6 +5,7 @@ const csvWriter = require('csv-write-stream');
 const fs = require('fs');
 const dbHelpers = require('../database/dbHelpers.js');
 
+
 const writer = csvWriter({ sendHeaders: false });
 let globalId = 0;
 
@@ -29,6 +30,7 @@ const genderGenerator = () => {
   return result;
 };
 
+
 const ageGenerator = () => {
   const chance = Math.random();
   let type;
@@ -52,16 +54,16 @@ const ratioThresholdGenerator = () => {
 const interestGenerator = () => {
   const chance = () => Math.round(Math.random() * 100) / 100;
   const interests = {
-    food: chance(),
-    fashion: chance(),
-    products: chance(),
-    sports: chance(),
-    travel: chance(),
-    events: chance(),
-    design: chance(),
-    entertainment: chance(),
-    'DIY/crafts': chance(),
-    photography: chance(),
+    1: chance(),
+    2: chance(),
+    3: chance(),
+    4: chance(),
+    5: chance(),
+    6: chance(),
+    7: chance(),
+    8: chance(),
+    9: chance(),
+    10: chance(),
   };
   return interests;
 };
@@ -71,7 +73,6 @@ const userGenerator = () => {
   const genderAndName = genderGenerator();
   const userResult = {
     ratio_threshold: ratioThresholdGenerator(),
-    // id: globalId,
     interests: JSON.stringify(interestGenerator()),
     pin_click_freq: pinClickGenerator(),
     user_name: genderAndName.name,
@@ -86,17 +87,19 @@ const userGenerator = () => {
 const runGenerator = (numberOfUsers) => {
   writer.pipe(fs.createWriteStream('users.csv'));
   while (globalId < numberOfUsers) {
+    globalId += 1;
     const user = userGenerator();
     writer.write(user);
-    globalId += 1;
   }
 };
 
 
-runGenerator(500000);
+// runGenerator(1500000);
 
-writer.end();
 
-dbHelpers.bulkInsertUsers('users.csv');
+// writer.end(dbHelpers.bulkInsertUsers('users.csv'));
 
-console.log('USER BATCH COMPLETE');
+
+// console.log('USER BATCH COMPLETE');
+
+module.exports = interestGenerator;

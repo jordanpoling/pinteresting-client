@@ -1,15 +1,15 @@
 const AWS = require('aws-sdk');
 
-// AWS.config.loadFromPath('../AWSConfig.json');
+AWS.config.loadFromPath('../AWSConfig.json');
 const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 module.exports = {
   send: (params) => {
     sqs.sendMessage(params, (err, data) => {
       if (err) {
-        console.log('Error', err);
+        // console.log('Error ', err);
       } else {
-        console.log('Success', data.MessageId);
+        // console.log('Success', data.MessageId);
       }
     });
   },
@@ -18,7 +18,6 @@ module.exports = {
       if (err) {
         console.log('Receive Error', err);
       } if (data.Messages) {
-        // console.log(data)
         callback(data.Messages);
         deleteParams.Entries = [];
         data.Messages.forEach((message) => {
@@ -30,7 +29,7 @@ module.exports = {
           if (err) {
             console.log('Delete Error', err);
           } else {
-            console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
+            // console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
           }
         });
       }

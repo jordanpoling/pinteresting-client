@@ -1,47 +1,59 @@
 const db = require('../database/dbHelpers.js');
 const sqs = require('./sqsHelpers.js');
 const User = require('./UserClass.js').Class;
+const cluster = require('cluster');
+const cpuCount = require('os').cpus().length;
 
+let successful = 0;
+const startTime = new Date().getTime();
 
-const makeUsersBehave = (sqsMessages) => {
-  const usersAdsObject = {};
-  const rawUsers = [];
-  sqsMessages.forEach((message) => {
-    // console.log(message.Body.user)
-    message = JSON.parse(message.Body);
-    rawUsers.push(message.userId);
-    usersAdsObject[message.userId] = message.ads;
+if (cluster.isMaster) {
+  for (let i = 0; i < cpuCount; i += 1) {
+    cluster.fork();
+  }
+  cluster.on('exit', (worker) => {
+    cluster.fork();
   });
-
-  console.log(rawUsers);
-
-  db.getUsersForBehavior(rawUsers)
-    .then((users) => {
-      // console.log(users)
-      users.forEach((user) => {
-        const userClass = new User(user);
-        userClass.userInteractions(usersAdsObject[user.id]);
-      });
-    })
-    .catch((err) => {console.log(err)});
-};
-
-const receiveParams = {
-  MaxNumberOfMessages: 10,
-  MessageAttributeNames: [
-    'All',
-  ],
-  QueueUrl: process.env.CLIENT_RESPONSE,
-  VisibilityTimeout: 10,
-  WaitTimeSeconds: 10,
-};
-
-const deleteParams = {
-  QueueUrl: process.env.CLIENT_RESPONSE,
-};
+} else {
+  const makeUsersBehave = (sqsMessages) => {
+    const usersAdsObject = {};
+    const rawUsers = [];
+    sqsMessages.forEach((message) => {
+      message = JSON.parse(message.Body);
+      rawUsers.push(message.userId);
+      usersAdsObject[message.userId] = message.ads;
+    });
+    db.getUsersForBehavior(rawUsers)
+      .then((users) => {
+        users.forEach((user) => {
+          const userClass = new User(user);
+          userClass.userInteractions(usersAdsObject[user.id]);
+          successful += 1;
+          if (successful % 100 === 0) {
+            console.log(`${successful} requests successfully received in ${(new Date().getTime() - startTime) / 1000} seconds`);
+          }
+        });
+      })
+      .catch((err) => { console.log(err); });
+  };
 
 
-// sqs.receive(makeUsersBehave, receiveParams, deleteParams)
+  const receiveParams = {
+    MaxNumberOfMessages: 10,
+    MessageAttributeNames: [
+      'All',
+    ],
+    QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_response',
+    VisibilityTimeout: 10,
+    WaitTimeSeconds: 10,
+  };
 
-setInterval(() =>{sqs.receive(makeUsersBehave, receiveParams, deleteParams)}, 10);
+  const deleteParams = {
+    QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_response',
+  };
 
+
+  // sqs.receive(makeUsersBehave, receiveParams, deleteParams);
+
+  setInterval(() => { sqs.receive(makeUsersBehave, receiveParams, deleteParams); }, 1);
+}
