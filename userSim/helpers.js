@@ -14,9 +14,9 @@ module.exports = {
   calculateScore: ({
     userId, pClicked, pServed, aServed, totalAdInt,
   }) => {
-    console.log('aServed', aServed, 'totalAdInt', totalAdInt);
-    console.log('adScore',totalAdInt / aServed);
-    console.log('pinScore',pClicked / pServed);
+    // console.log('aServed', aServed, 'totalAdInt', totalAdInt);
+    // console.log('adScore',totalAdInt / aServed);
+    // console.log('pinScore',pClicked / pServed);
     const result = {
       userHealth: parseFloat((pClicked / pServed) + ((totalAdInt / aServed) / 2)),
       userId,

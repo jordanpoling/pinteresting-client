@@ -15,7 +15,7 @@ module.exports = {
     `)
       .catch((err) => { console.log('UUA1st',err); });
     return db.any(`SELECT average
-      FROM users WHERE id = ${userId}`).catch((err) => { console.log('UUA2nd',err); });
+      FROM users WHERE id = ${userId}`).catch((err) => { console.log('UUA2nd', err); });
   },
   insertHealth: ({ engagementScore, userId }) =>
     db.one(`UPDATE users SET score_sum = score_sum+${engagementScore}, session_entries = session_entries + 1
@@ -48,6 +48,11 @@ module.exports = {
   getUsersForBehavior: (ids) => {
     return db.query(`SELECT * FROM users WHERE id = ANY(ARRAY[${ids}])`)
       .catch(err => console.log(err));
+  },
+  reRollInterests: (id, interests) => {
+    // console.log('interests', interests, 'id', id);
+    db.one(`UPDATE users SET interests = ${interests} where id = id`)
+      .catch((err) =>{console.log(err)});
   },
 };
 

@@ -1,5 +1,7 @@
 const helpers = require('./helpers.js');
 const sqs = require('./sqsHelpers.js');
+const interestGenerator = require('./generateUsers');
+const db = require('../database/dbHelpers');
 
 
 module.exports.Class = class User {
@@ -10,16 +12,16 @@ module.exports.Class = class User {
       id,
       total: 0,
       aInteractions: {
-        crafts: 0,
-        design: 0,
-        entertainment: 0,
-        events: 0,
-        fashion: 0,
-        food: 0,
-        photography: 0,
-        products: 0,
-        sports: 0,
-        travel: 0,
+        9: 0,
+        7: 0,
+        8: 0,
+        6: 0,
+        2: 0,
+        1: 0,
+        10: 0,
+        3: 0,
+        4: 0,
+        5: 0,
       },
       pClicked: 0,
       pServed: 32,
@@ -42,7 +44,7 @@ module.exports.Class = class User {
       return result;
     };
 
-    this.funnelDepth = ({ ad_group, id }) => {
+    this.funnelDepth = ({ main_interest_id, id }) => {
       const probability = Math.random();
       const getFunnelResults = () => {
         const params = {
@@ -51,21 +53,35 @@ module.exports.Class = class User {
           MessageBody: '',
           QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_advertisements',
         };
-        if (probability < this.interests[ad_group] * 0.15) {
-          params.MessageBody = JSON.stringify({ group: ad_group, type: 'conversion', id });
-          console.log('PARAMS',params)
+        if (probability < this.interests[main_interest_id] * 0.15) {
+          this.clickResults.aInteractions[main_interest_id] = 1;
+          this.clickResults.totalAdInt += 1;
+          params.MessageBody = JSON.stringify({ group: main_interest_id, type: 'conversion', id });
           sqs.send(params);
-        } else if (probability < this.interests[ad_group] * 0.5) {
-          params.MessageBody = JSON.stringify({ group: ad_group, type: 'engagement', id });
-          console.log('PARAMS',params)
+        } else if (probability < this.interests[main_interest_id] * 0.5) {
+          this.clickResults.aInteractions[main_interest_id] = 1;
+          this.clickResults.totalAdInt += 1;
+          params.MessageBody = JSON.stringify({ group: main_interest_id, type: 'engagement', id });
           sqs.send(params);
-        } else if (probability < this.interests[ad_group]) {
-          params.MessageBody = JSON.stringify({ group: ad_group, type: 'impression', id });
-          console.log('PARAMS', params)
+        } else {
+          if (probability < this.interests[main_interest_id]) {
+            this.clickResults.aInteractions[main_interest_id] = 1;
+            this.clickResults.totalAdInt += 1;
+          }
+          params.MessageBody = JSON.stringify({ main_interest_id, type: 'impression', id });
           sqs.send(params);
         }
       };
       getFunnelResults();
+    };
+
+
+    this.changeUserInterests = (id) => {
+      const chance = Math.random() * 10;
+      if (chance > 0.90) {
+        const newInterests = interestGenerator();
+        db.reRollInterests(id, newInterests);
+      }
     };
 
 
@@ -78,38 +94,26 @@ module.exports.Class = class User {
       }
       this.clickResults.aServed = ads.length;
       ads.forEach((ad) => {
-        // console.log(ad);
-        const probability = Math.random();
-        if (probability < this.interests[ad.ad_group]) {
-          this.funnelDepth(ad);
-          // if (this.clickResults.aInteractions[ad.ad_group]) {
-          //   const prevClicks = this.clickResults.aInteractions[ad.ad_group];
-          //   this.clickResults.aInteractions[ad.ad_group] = prevClicks + 1;
-          //   this.clickResults.totalAdInt += 1;
-          // } else {
-          this.clickResults.aInteractions[ad.ad_group] = 1;
-          this.clickResults.totalAdInt += 1;
-          // }
-        }
+        this.funnelDepth(ad);
       });
       const { id } = this.clickResults;
       const { aInteractions } = this.clickResults;
       const score = helpers.calculateScore(this.clickResults);
-      // console.log('clickResults', this.clickResults);
-      // console.log('adScore',aServed / totalAdInt);
-      // console.log('pinScore',pClicked / pServed);
       const user = {
         userId: id,
         engagementScore: score.userHealth,
         adClicks: aInteractions,
       };
-      // console.log(user);
+      if (this.clickResults.aServed / this.clickResults.pServed > this.ratioThreshold) {
+        // console.log('RATIO THRESHOLD BROKEN');
+      }
       const params = {
         MessageAttributes: {
         },
         MessageBody: JSON.stringify(user),
-        QueueUrl: process.env.CLIENT_ANALYSIS,
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_analysis',
       };
+      // this.changeUserInterests(id);
       sqs.send(params);
     };
 
@@ -118,8 +122,8 @@ module.exports.Class = class User {
       const params = {
         MessageAttributes: {
         },
-        MessageBody: JSON.stringify(this.clickResults.id),
-        QueueUrl: process.env.CLIENT_REQUEST,
+        MessageBody: JSON.stringify({ userId: this.clickResults.id }),
+        QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_request',
       };
       sqs.send(params);
     };
