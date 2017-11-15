@@ -1,12 +1,21 @@
 const express = require('express');
-const helpers = require('../router/helpers');
+const helpers = require('../userSim/helpers');
 const dbHelpers = require('../database/dbHelpers.js');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
 const elastic = require('../database/elasticSearch.js');
 const AWS = require('aws-sdk');
+const sqs = require('../userSim/sqsHelpers.js');
+const winston = require('winston');
 
-const counter = 0;
+let logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: './sim.log' }),
+  ],
+});
+
+
 // if (cluster.isMaster) {
 //   for (let i = 0; i < cpuCount; i += 1) {
 //     cluster.fork();
@@ -17,73 +26,64 @@ const counter = 0;
 // } else {
 console.log('worker initialized');
 
-AWS.config.loadFromPath('../AWSConfig.json');
-const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
-const params = {
+let counter = 0;
+const work = (messages) => {
+  messages.forEach((element) => {
+    const body = JSON.parse(element.Body);
+    const { engagementScore } = body;
+    const { userId } = body;
+    const { adClicks } = body;
+    const user = {
+      userId,
+      engagementScore,
+      adClicks,
+      scoreDropped: false,
+    };
+    let longAverage;
+    console.log(user);
+    dbHelpers.insertHealth(user)
+      .then((result) => {
+        console.log(result);
+        longAverage = result.average;
+        return dbHelpers.updateUserAverage(result); })
+      .then((average) => {
+        if (!!((average[0].average * 10) - (longAverage * 10)) / 10 > 0.05) {
+          user.scoreDropped = true;
+          elastic.insertCritical(engagementScore, userId)
+            .catch((err) => { console.log(err); });
+        }
+        elastic.insertHealth(engagementScore)
+          .catch((err) => { console.log(err); });
+        const params = {
+          MessageAttributes: {
+          },
+          MessageBody: JSON.stringify(user),
+          QueueUrl: process.env.ANALYTICS_CLIENT,
+        };
+        sqs.send(params);
+      })
+      .catch((err) => { console.log(err); });
+    logger.log(counter);
+    counter += 1;
+  });
+};
+
+const receiveParams = {
   MaxNumberOfMessages: 10,
   MessageAttributeNames: [
     'All',
   ],
-  QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
+  QueueUrl: process.env.CLIENT_ANALYSIS,
   VisibilityTimeout: 10,
   WaitTimeSeconds: 10,
 };
 
-const work = (messages) => {
-  // console.log('MESSAGEMESSAGEMESSAGE',message);
-  messages.forEach(function(element) {
-    const body = JSON.parse(element.Body);
-    const { score } = body;
-    const { id } = body;
-    // console.log('score, id', score, id);
-    const user = {
-      id,
-      score,
-    };
-    dbHelpers.insertHealth(user)
-      .then(result =>
-        // console.log('result', result);
-        dbHelpers.updateUserAverage(result),)
-      .then(({ average }) => {
-        // console.log('average', average);
-        if (average - score > 0.2) {
-          elastic.insertCritical(score.userHealth, id);
-          //  add a job to casey's queue
-        }
-      })
-      .catch((err) => { console.log(err) });
-    elastic.insertHealth(score);
-  });
-  
+const deleteParams = {
+  QueueUrl: process.env.CLIENT_ANALYSIS,
+  Entries: [],
 };
 
-const processMessages = () => {
-  sqs.receiveMessage(params, (err, data) => {
-    if (err) {
-      console.log('Receive Error', err);
-    } if (data.Messages) {
-      // console.log('MESSAGESMESSAGESMESSAGES', data.Messages);
-      work(data.Messages);
-      messagesToDelete = []
-      data.Messages.forEach((message)=>{
-        messagesToDelete.push({Id: message.MessageId, ReceiptHandle: message.ReceiptHandle});
-      });
-      // console.log('MESSAGES TO DELETE MESSAGES TO DELETE', messagesToDelete)
-      const deleteParams = {
-        QueueUrl: 'https://sqs.us-east-2.amazonaws.com/861910894388/analyticsIn',
-        Entries: messagesToDelete,
-      };
 
-      //  generate an array of ids and receipts to pass to delete batch
-      sqs.deleteMessageBatch(deleteParams, (err, data) => {
-        if (err) {
-          console.log('Delete Error', err);
-        } else {
-          // console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
-        }
-      });
-    }
-  });
-};
-setInterval(processMessages, 20);
+// sqs.receive(work,receiveParams,deleteParams);
+setInterval(() => { sqs.receive(work, receiveParams, deleteParams); }, 10);
 // }

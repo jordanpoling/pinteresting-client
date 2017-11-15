@@ -4,7 +4,8 @@
   "description": "Thesis",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "mocha --timeout 1000"
+    "test": "mocha --timeout 1000",
+    "start": "node ./userSim/requestAds.js && node ./userSim/consumeAds.js && node ./analysis/index.js"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,7 @@
     "random-decimal": "^1.0.2",
     "random-world": "^1.2.1",
     "redis": "^2.8.0",
-    "sqs-consumer": "^3.8.0"
+    "sqs-consumer": "^3.8.0",
+    "winston": "^2.4.0"
   }
 }
