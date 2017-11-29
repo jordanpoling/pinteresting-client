@@ -104,16 +104,13 @@ module.exports.Class = class User {
         engagementScore: score.userHealth,
         adClicks: aInteractions,
       };
-      if (this.clickResults.aServed / this.clickResults.pServed > this.ratioThreshold) {
-        // console.log('RATIO THRESHOLD BROKEN');
-      }
       const params = {
         MessageAttributes: {
         },
         MessageBody: JSON.stringify(user),
         QueueUrl: 'https://sqs.us-west-1.amazonaws.com/854541618844/client_analysis',
       };
-      // this.changeUserInterests(id);
+      this.changeUserInterests(id);
       sqs.send(params);
     };
 

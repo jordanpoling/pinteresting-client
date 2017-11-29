@@ -2,16 +2,14 @@ const dbHelpers = require('../database/dbHelpers.js');
 const elastic = require('../database/elasticSearch.js');
 const sqs = require('../userSim/sqsHelpers.js');
 
-
+const fileForLogging = 'analysis.js';
 let successful = 0;
 const startTime = new Date().getTime();
 
 const work = (messages) => {
   messages.forEach((element) => {
     const body = JSON.parse(element.Body);
-    const { engagementScore } = body;
-    const { userId } = body;
-    const { adClicks } = body;
+    const { engagementScore, userId, adClicks } = body;
     const user = {
       userId,
       engagementScore,
@@ -21,17 +19,19 @@ const work = (messages) => {
     let longAverage;
     dbHelpers.insertHealth(user)
       .then((result) => {
+        //  after inserting the user's health, update their average
         longAverage = result.average;
         return dbHelpers.updateUserAverage(result);
       })
       .then((average) => {
         if (!!((average[0].average * 10) - (longAverage * 10)) / 10 > 0.20) {
+          // if their average engagement had dropped > 20% report to ElasticSearch and alert analysis
           user.scoreDropped = true;
           elastic.insertCritical(engagementScore, userId)
-            .catch((err) => { console.log(err); });
+            .catch((err) => { elastic.insertError(err, fileForLogging); });
         }
         elastic.insertHealth(engagementScore, userId)
-          .catch((err) => { console.log(err); });
+          .catch((err) => { elastic.insertError(err, fileForLogging);; });
         const params = {
           MessageAttributes: {
           },
@@ -44,7 +44,7 @@ const work = (messages) => {
           console.log(`${successful} requests successfully received in ${(new Date().getTime() - startTime) / 1000} seconds`);
         }
       })
-      .catch((err) => { console.log(err); });
+      .catch((err) => { elastic.insertError(err, fileForLogging);; });
   });
 };
 

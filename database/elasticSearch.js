@@ -33,4 +33,13 @@ module.exports = {
       date: new Date().toISOString(),
     },
   }),
+  insertError: (error, file) => client.index({
+    index: 'error',
+    type: 'error',
+    body: {
+      error,
+      file,
+      date: new Date().toISOString(),
+    },
+  }),
 };

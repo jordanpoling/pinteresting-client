@@ -3,11 +3,12 @@ const Express = require('express');
 const bodyParser = require('body-parser');
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
+const elastic = require('../database/elasticSearch.js');
 
 let App = Express();
 
 App.use(bodyParser.json());
-
+const fileForLogging = 'userSim.js';
 
 if (cluster.isMaster) {
   for (let i = 0; i < cpuCount; i += 1) {
@@ -19,20 +20,21 @@ if (cluster.isMaster) {
 } else {
   Sim.runSim(JSON.stringify({ start: true }));
   App.get('/start', (req, res, err) => {
-    console.log('start hit', req.body);
+    if (err) { elastic.insertError(err, fileForLogging); }
     if (JSON.stringify(req.body) === JSON.stringify({ start: true })) {
       Sim.runSim(JSON.stringify({ start: true }));
     }
   });
 
   App.get('/once', (req, res, err) => {
-    console.log('once hit', req.body);
+    if (err) { elastic.insertError(err, fileForLogging); }
     if (JSON.stringify(req.body) === JSON.stringify({ once: true })) {
       Sim.runOnce(JSON.stringify(req.body));
     }
   });
 
   App.get('/stop', (req, res, err) => {
+    if (err) { elastic.insertError(err, fileForLogging); }
     if (JSON.stringify(req.body) === JSON.stringify({ stop: true })) {
       App = Express();
     }

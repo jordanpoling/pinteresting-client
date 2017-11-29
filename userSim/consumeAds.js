@@ -3,9 +3,11 @@ const sqs = require('./sqsHelpers.js');
 const User = require('./UserClass.js').Class;
 const cluster = require('cluster');
 const cpuCount = require('os').cpus().length;
+const elastic = require('../database/elasticSearch.js');
 
 let successful = 0;
 const startTime = new Date().getTime();
+const fileForLogging = 'consumeAds.js';
 
 if (cluster.isMaster) {
   for (let i = 0; i < cpuCount; i += 1) {
@@ -34,7 +36,7 @@ if (cluster.isMaster) {
           }
         });
       })
-      .catch((err) => { console.log(err); });
+      .catch((err) => { elastic.insertError(err, fileForLogging); });
   };
 
 

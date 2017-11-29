@@ -1,4 +1,7 @@
 const AWS = require('aws-sdk');
+const elastic = require('../database/elasticSearch.js');
+
+const fileForLogging = 'sqsHelpers.js';
 
 AWS.config.loadFromPath('../AWSConfig.json');
 const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
@@ -7,16 +10,14 @@ module.exports = {
   send: (params) => {
     sqs.sendMessage(params, (err, data) => {
       if (err) {
-        // console.log('Error ', err);
-      } else {
-        // console.log('Success', data.MessageId);
+        elastic.insertError(err, fileForLogging);
       }
     });
   },
   receive: (callback, receiveParams, deleteParams) => {
     sqs.receiveMessage(receiveParams, (err, data) => {
       if (err) {
-        console.log('Receive Error', err);
+        elastic.insertError(err, fileForLogging);
       } if (data.Messages) {
         callback(data.Messages);
         deleteParams.Entries = [];
@@ -27,9 +28,7 @@ module.exports = {
         });
         sqs.deleteMessageBatch(deleteParams, (err, data) => {
           if (err) {
-            console.log('Delete Error', err);
-          } else {
-            // console.log('MESSAGE DELETED MESSAGE DELETED MESSAGE DELETED', data);
+            elastic.insertError(err, fileForLogging);
           }
         });
       }
