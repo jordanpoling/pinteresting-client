@@ -1,3 +1,6 @@
+///////////////////////////////////////////////////////
+//////     SERVER FOR RUNNING SIM REMOTELY      ///////
+///////////////////////////////////////////////////////
 const Sim = require('../analysis/index');
 const Express = require('express');
 const bodyParser = require('body-parser');

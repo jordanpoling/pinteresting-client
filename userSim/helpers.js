@@ -3,7 +3,7 @@ const User = require('./UserClass.js').Class;
 module.exports = {
   makeActiveUsers: (usersForClass) => {
     const result = [];
-    for (const key in usersForClass) {
+    for (let key in usersForClass) {
       result.push(new User(usersForClass[key]));
     }
     return result;
