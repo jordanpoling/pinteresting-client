@@ -1,6 +1,7 @@
 # Project Name
 
 Pinteresting - User Simulation and Engagement Score
+Documentation on entire system here - https://docs.google.com/document/d/1Atn43GAu45OyQUkyCdZBsl5zgg4MugXUpTZWyMi4OUA/edit#0
 
 
 ## Contributing
